@@ -1,0 +1,12 @@
+[submodule "Assets/Environment"]
+	path = Assets/Environment
+	url = https://github.com/scarlethammergames/Environment
+[submodule "Assets/Syphen-and-Blitz"]
+	path = Assets/Syphen-and-Blitz
+	url = https://github.com/scarlethammergames/Syphen-and-Blitz
+[submodule "Assets/Music"]
+	path = Assets/Music
+	url = https://github.com/scarlethammergames/Music
+[submodule "Assets/Deft-Networking-Framework"]
+	path = Assets/Deft-Networking-Framework
+	url = https://github.com/calben/Deft-Networking-Framework
