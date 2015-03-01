@@ -12,10 +12,10 @@ public class GravityNodeBehaviour : MonoBehaviour
   public float radiusBirth;
   public float radiusDeath;
   public float radiusRatio;
-  public float duration;
   public GravityNodeType type;
 
   public bool timed;
+  public float duration;
 
   float currentRadius;
   float currentMagnitude;
@@ -49,7 +49,7 @@ public class GravityNodeBehaviour : MonoBehaviour
           case GravityNodeType.Lift:
             if (status == null || status.liftable)
             {
-              other.rigidbody.AddForce(direction * (currentMagnitude / Vector3.Magnitude(other.transform.position - this.transform.position)), ForceMode.Impulse);
+              other.rigidbody.AddForce(Vector3.up * (currentMagnitude / Vector3.Magnitude(other.transform.position - this.transform.position)), ForceMode.Impulse);
             }
             break;
           case GravityNodeType.Pull:
@@ -61,7 +61,7 @@ public class GravityNodeBehaviour : MonoBehaviour
           case GravityNodeType.Push:
             if (status == null || status.liftable)
             {
-              other.rigidbody.AddForce(direction * (currentMagnitude / Vector3.Magnitude(other.transform.position - this.transform.position)), ForceMode.Impulse);
+              other.rigidbody.AddForce(direction * (currentMagnitude / Vector3.Magnitude(this.transform.position - other.transform.position)), ForceMode.Impulse);
             }
             break;
         }
