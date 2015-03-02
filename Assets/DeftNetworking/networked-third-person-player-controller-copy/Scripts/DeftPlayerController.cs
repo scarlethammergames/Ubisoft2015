@@ -4,7 +4,7 @@ using GamepadInput;
 using UnityEngine;
 
 
-public enum PlayerState { aiming, walking, running, sprinting, jumping };
+public enum PlayerState { idle, aiming, walking, running, sprinting, jumping };
 public delegate void ButtonAction();
 
 /// <summary>
@@ -33,7 +33,7 @@ public class DeftPlayerController : MonoBehaviour
   public float playerWidth;
 
   public bool debug;
-  public bool useGamepad = true;
+  public bool useGamepad;
   public bool singlePlayer;
 
   public bool isGrounded;
@@ -77,7 +77,7 @@ public class DeftPlayerController : MonoBehaviour
   public bool controllerSprint;
   public float controllerAim;
   public Vector2 controllerMoveDirection;
-  public Vector2 controlerLookDirection;
+  public Vector2 controllerLookDirection;
   public Vector2 dpadDown;
 
   public GamepadState gamepadState;
@@ -86,6 +86,8 @@ public class DeftPlayerController : MonoBehaviour
   {
     if (networkView.isMine || singlePlayer)
     {
+			#region Controller State
+
       if (useGamepad)
       {
         this.gamepadState = GamePad.GetState(this.pad_index);
@@ -103,6 +105,10 @@ public class DeftPlayerController : MonoBehaviour
         //controllerAim = Input.GetMouseButton(1);
       }
 
+			#endregion
+
+			#region Movement and Look Directions
+
       invertTimer += Time.deltaTime;
 
       // invert y axis if down on dpad is pressed
@@ -116,43 +122,52 @@ public class DeftPlayerController : MonoBehaviour
         invertTimer = 0;
       }
 
-
-      if (controllerAim > 0.20f)
-      {
-        this.state = PlayerState.aiming;
-      }
-      else if (controllerJump)
-      {
-        this.state = PlayerState.jumping;
-      }
-      else if (controllerSprint && controllerRun)
-      {
-        this.state = PlayerState.sprinting;
-      }
-      else if (controllerRun)
-      {
-        this.state = PlayerState.running;
-      }
-      else
-      {
-        this.state = PlayerState.walking;
-      }
       this.controllerMoveDirection = new Vector3(0, 0, 0);
-      this.controlerLookDirection = new Vector3(0, 0, 0);
+      this.controllerLookDirection = new Vector3(0, 0, 0);
       if (useGamepad)
       {
         this.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, pad_index);
-        this.controlerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, pad_index);
+        this.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, pad_index);
       }
       else
       {
         this.controllerMoveDirection = new Vector2(Input.GetAxis("Horizontal"), -Input.GetAxis("Vertical"));
-        this.controlerLookDirection = new Vector2(Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1), Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1));
+        this.controllerLookDirection = new Vector2(Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1), Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1));
       }
 
       if (inverted)
-        this.controlerLookDirection.y *= -1;
+        this.controllerLookDirection.y *= -1;
     }
+
+		#endregion
+
+		#region PlayerState
+
+		if (controllerAim > 0.20f)
+		{
+			this.state = PlayerState.aiming;
+		}
+		else if (controllerJump)
+		{
+			this.state = PlayerState.jumping;
+		}
+		else if (controllerSprint && controllerRun)
+		{
+			this.state = PlayerState.sprinting;
+		}
+		else if (controllerRun)
+		{
+			this.state = PlayerState.running;
+		}
+		else if(this.controllerMoveDirection.sqrMagnitude > 0.20f)
+		{
+			this.state = PlayerState.walking;
+		}
+		else{
+			this.state = PlayerState.idle;
+		}
+
+		#endregion
   }
 
   void FixedUpdate()
