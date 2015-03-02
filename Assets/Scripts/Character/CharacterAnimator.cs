@@ -2,31 +2,35 @@
 using System.Collections;
 
 public class CharacterAnimator : MonoBehaviour {
+	public float _runThreshold = 0.01f;
+	public float _sprintThreshold = 10f;
 
-  Animator anim;
-  DeftPlayerController controller;
+	Animator _animator;
+  //DeftPlayerController controller;
+	Rigidbody _rb;
 
 	// Use this for initialization
 	void Start () {
-    anim = this.GetComponent<Animator>();
-    anim.SetBool("isIdle", true);
-    controller = this.GetComponent<DeftPlayerController>();
+		_animator = this.GetComponent<Animator>();
+		_animator.SetBool("isIdle", true);
+    	 _rb = this.GetComponent<Rigidbody>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	  if(anim)
-    {
-      if(this.controller.state == PlayerState.running || this.controller.state == PlayerState.sprinting || this.controller.state == PlayerState.walking)
-      {
-        anim.SetBool("isIdle", false);
-        anim.SetBool("isRunning", true);
-      }
-      else
-      {
-        anim.SetBool("isIdle", true);
-        anim.SetBool("isRunning", false);
-      }
-    }
+		if(_animator)
+		{
+			float speed = _rb.GetPointVelocity(Vector3.zero).magnitude;
+			if(speed > _runThreshold)
+			{
+				_animator.SetBool("isIdle", false);
+				_animator.SetBool("isRunning", true);
+			}
+			else
+			{
+				_animator.SetBool("isIdle", true);
+				_animator.SetBool("isRunning", false);
+			}
+		}
 	}
 }
