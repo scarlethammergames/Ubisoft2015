@@ -9,7 +9,7 @@ public class CharacterAnimator : MonoBehaviour {
   	DeftPlayerController _controller;
 	Rigidbody _rb;
 	string[] _animationBoolParameters = {"isIdle", "isRunning", "isAttacking_Projectile"};
-	float _currentStateIndex = 0;
+	int _currentStateIndex = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -24,7 +24,7 @@ public class CharacterAnimator : MonoBehaviour {
 	void Update () {
 		if(_animator)
 		{
-			float newStateIndex = _currentStateIndex;
+			int newStateIndex = _currentStateIndex;
 			//float speed = _rb.GetPointVelocity(Vector3.zero).magnitude;
 			if(_controller.state == PlayerState.walking)
 			{
