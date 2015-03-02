@@ -33,7 +33,7 @@ public class DeftPlayerController : MonoBehaviour
   public float playerWidth;
 
   public bool debug;
-  public bool useGamepad;
+  public bool useGamepad = true;
   public bool singlePlayer;
 
   public bool isGrounded;
@@ -61,7 +61,9 @@ public class DeftPlayerController : MonoBehaviour
       Camera.main.GetComponent<DeftPlayerCamera>().player = this.gameObject;
       Camera.main.GetComponent<DeftPlayerCamera>().Reset();
     }
-    this.BButton = this.gameObject.GetComponent<TestingThrusters>().Activate;
+	if( this.gameObject.GetComponent<TestingThrusters>() ){
+	  this.BButton = this.gameObject.GetComponent<TestingThrusters>().Activate;
+	}
     Debug.Log("PLAYER IS AWAKE");
   }
 
@@ -155,10 +157,10 @@ public class DeftPlayerController : MonoBehaviour
 
   void FixedUpdate()
   {
-    if(this.gamepadState.B)
-    {
-      this.BButton();
-    }
+//    if(this.gamepadState.B)
+//    {
+//      this.BButton();
+//    }
     if (debug)
     {
       foreach (FieldInfo info in this.gameObject.GetComponent<DeftPlayerController>().GetType().GetFields())
