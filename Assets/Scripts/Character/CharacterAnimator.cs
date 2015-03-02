@@ -9,6 +9,7 @@ public class CharacterAnimator : MonoBehaviour {
   	DeftPlayerController _controller;
 	Rigidbody _rb;
 	string[] _animationBoolParameters = {"isIdle", "isRunning", "isAttacking_Projectile"};
+	int _currentStateIndex = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -23,21 +24,33 @@ public class CharacterAnimator : MonoBehaviour {
 	void Update () {
 		if(_animator)
 		{
+			int newStateIndex = _currentStateIndex;
 			//float speed = _rb.GetPointVelocity(Vector3.zero).magnitude;
 			if(_controller.state == PlayerState.walking)
 			{
-				transition(1);
+				newStateIndex = 1;
 			}
-			else if(_controller.state == PlayerState.aiming){
-				transition(2);
+			else if(_controller.state == PlayerState.aiming)
+			{
+				newStateIndex = 2;
 			}
 			else
 			{
-				transition(0);
+				newStateIndex = 0;
+			}
+			if(newStateIndex != _currentStateIndex){
+				if(Network.isClient || Network.isServer){
+					networkView.RPC("transition", RPCMode.All, newStateIndex);
+				}
+				else{
+					transition(newStateIndex);
+				}
+				_currentStateIndex = newStateIndex;
 			}
 		}
 	}
 
+	[RPC]
 	void transition(int parameterIndex){
 		_animator.SetBool(_animationBoolParameters[parameterIndex], true);
 		for(int i = 0; i < _animationBoolParameters.Length; ++i){
