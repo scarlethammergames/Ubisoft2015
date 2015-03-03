@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Image = UnityEngine.UI.Image;
 
@@ -62,8 +62,8 @@ public class DeftPlayerCamera : MonoBehaviour
         {
             return;
         }
-        angleH += player_controller.controlerLookDirection.x * horizontalAimingSpeed * Time.deltaTime;
-        angleV += player_controller.controlerLookDirection.y * verticalAimingSpeed * Time.deltaTime;
+        angleH += player_controller.controllerLookDirection.x * horizontalAimingSpeed * Time.deltaTime;
+        angleV += player_controller.controllerLookDirection.y * verticalAimingSpeed * Time.deltaTime;
         angleV = Mathf.Clamp(angleV, minVerticalAngle, maxVerticalAngle);
 
 
