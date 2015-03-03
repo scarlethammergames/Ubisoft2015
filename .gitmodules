@@ -1,7 +1,0 @@
-
-[submodule "Assets/DeftNetworking/networked-rigidbody-manager"]
-	path = Assets/DeftNetworking/networked-rigidbody-manager
-	url = https://github.com/calben/networked-rigidbody-manager
-[submodule "Assets/DeftNetworking/networked-third-person-player-controller"]
-	path = Assets/DeftNetworking/networked-third-person-player-controller
-	url = https://github.com/calben/networked-third-person-player-controller
