@@ -18,10 +18,10 @@ public delegate void ButtonAction();
 /// </summary>
 public class DeftPlayerController : MonoBehaviour
 {
-    public float speedAim = 1.0f;
-    public float speedWalk = 2.0f;
-    public float speedRun = 4.0f;
-    public float speedSprint = 7.0f;
+    public float speedWhileAim = 1.0f;
+    public float speedWhileWalk = 2.0f;
+    public float speedWhileRun = 4.0f;
+    public float speedWhileSprint = 7.0f;
     public float jumpHeight = 5.0f;
     public float jumpCooldown = 1.0f;
     public float smoothingTurn = 2.0f;
@@ -198,7 +198,7 @@ public class DeftPlayerController : MonoBehaviour
         {
             case PlayerState.aiming:
                 {
-                    speed_current = speedAim;
+                    speed_current = speedWhileAim;
                     break;
                 }
             case PlayerState.jumping:
@@ -211,17 +211,17 @@ public class DeftPlayerController : MonoBehaviour
                 }
             case PlayerState.sprinting:
                 {
-                    speed_current = speedSprint;
+                    speed_current = speedWhileSprint;
                     break;
                 }
             case PlayerState.running:
                 {
-                    speed_current = speedRun;
+                    speed_current = speedWhileRun;
                     break;
                 }
             default:
                 {
-                    speed_current = speedWalk;
+                    speed_current = speedWhileWalk;
                     break;
                 }
         }
