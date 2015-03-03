@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using GamepadInput;
 
 //add to empty game object and attach in front (offset) of Blitz
 
@@ -8,18 +9,30 @@ public class GrenadeManager : MonoBehaviour {
 	public int currentAmmo;
 	public int maxAmmo;
 	public float recharge;
-	public float timer = 0;
+	public float rechargeTimer = 0;
 	public GameObject prefab; //insert grenade prefab here
 	public Vector3 offset; //unused
 	public float magnitude; //throwing velocity
-	
+
+	private bool trigger;
+	public float triggerCooldown = 1; //adjustable fire rate
+	private float cooldown = 0; // temp var for cooldown after trigger
+	private DeftPlayerController controller;
+
+
 	void Start () {
-		
+		controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
 	}
-	//need to change input to controller
-	void Update () {
-		if (Input.GetKeyDown (KeyCode.Space))
+
+	void Update () 
+	{
+		trigger = controller.gamepadState.RightShoulder;
+		cooldown -= Time.deltaTime;
+
+		if (trigger && cooldown<=0.0)
 		{
+			trigger = false;
+			cooldown = triggerCooldown;
 			if (currentAmmo > 0)
 			{
 				throwGrenade();
@@ -27,16 +40,16 @@ public class GrenadeManager : MonoBehaviour {
 			}
 		}
 	}
-	
+
 	void FixedUpdate()
 	{
 		if (currentAmmo < maxAmmo) 
 		{
-			if (timer > recharge){
+			if (rechargeTimer > recharge){
 				currentAmmo ++;
-				timer = 0;
+				rechargeTimer = 0;
 			}
-			timer += Time.deltaTime;
+			rechargeTimer += Time.deltaTime;
 			
 		}
 	}

@@ -23,6 +23,7 @@ public class fireProjectile: MonoBehaviour {
 	public ProjectileAction _projectileAction = ProjectileAction.THROW;
 
 	//Rate of fire
+	//public float _powerUpTime = 1.0f;
 	public float _cooldown = 1;
 	float _cooldownTimer;
 
@@ -51,6 +52,10 @@ public class fireProjectile: MonoBehaviour {
 	void Update () {
 		_cooldownTimer -= Time.deltaTime;
 
+		if(_parent){
+			this.transform.position = _parent.transform.position + _offset;
+		}
+
 		bool leftTriggerHeld = (GamePad.GetTrigger (GamePad.Trigger.LeftTrigger, _padIndex) > _triggerThreshold);
 		bool rightTriggerHeld = (GamePad.GetTrigger (GamePad.Trigger.RightTrigger, _padIndex) > _triggerThreshold);
 		if (_cooldownTimer <= 0.0f) 
@@ -71,9 +76,9 @@ public class fireProjectile: MonoBehaviour {
 
 				case ProjectileAction.BEAM:
 					if(Network.isClient || Network.isServer){
-						networkView.RPC("BeamAttack", RPCMode.All);
+						networkView.RPC("FireBeam", RPCMode.All);
 					}else{
-						BeamAttack ();
+						FireBeam ();
 					}
 					break;
 
@@ -110,7 +115,10 @@ public class fireProjectile: MonoBehaviour {
 					break;
 					
 				case ProjectileAction.BEAM:
-
+					if ( _alreadyFired ) {
+						_alreadyFired = false;
+						if(_controlledProjectile){ Destroy(_controlledProjectile); }
+					}
 					break;
 					
 				case ProjectileAction.REMOTE_CTRL:
@@ -144,18 +152,40 @@ public class fireProjectile: MonoBehaviour {
 	}
 
 	[RPC]
-	void BeamAttack(){
-		GameObject clone;
-		clone = Instantiate (_projectile, transform.position + _offset, transform.rotation) as GameObject;
-		//clone.rigidbody.velocity = transform.TransformDirection( trajectory * magnitude );
+	void FireBeam(){
+		RaycastHit hit;
+		float beamRange = 500;
+		float beamDiameter = 3;
+		float beamDistanceMagnifier = 4.5f;
 
-		Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
-		forward = forward.normalized;
-		clone.rigidbody.velocity = (new Vector3(forward.x * _magnitude,0,forward.z * _magnitude));
-		
-		if( _makeChild ){
-			clone.transform.parent = this.transform;
+		float currentDistanceFiring = 5;
+		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward).normalized;
+		if(Physics.Raycast(Camera.main.transform.position, cameraForward, out hit, beamRange)){
+			currentDistanceFiring = Vector3.Distance(hit.point, this.transform.position);
 		}
+
+		if(!_alreadyFired){
+			_controlledProjectile = Instantiate( _projectile, this.transform.position, Quaternion.identity ) as GameObject;
+			_alreadyFired = true;
+		}
+
+		_controlledProjectile.transform.position = this.transform.position;
+		_controlledProjectile.transform.LookAt(hit.point);
+		_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
+		_controlledProjectile.transform.localScale = new Vector3(beamDiameter, currentDistanceFiring * beamDistanceMagnifier, beamDiameter);
+
+		if(Network.isClient || Network.isServer){
+			networkView.RPC("LaserBeam", RPCMode.All, _controlledProjectile.transform.position, 
+			                							_controlledProjectile.transform.rotation, 
+			                							_controlledProjectile.transform.localScale);
+		}
+	}
+
+	[RPC]
+	void LaserBeam( Vector3 position, Quaternion rotationAngles, Vector3 scale){
+		_controlledProjectile.transform.position = position;
+		_controlledProjectile.transform.rotation = rotationAngles;
+		_controlledProjectile.transform.localScale = scale;
 	}
 
 	[RPC]
