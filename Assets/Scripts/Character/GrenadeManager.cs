@@ -57,9 +57,10 @@ public class GrenadeManager : MonoBehaviour {
 	void throwGrenade()
 	{
 		GameObject clone;
-		clone = Instantiate (prefab, transform.position + offset, transform.rotation) as GameObject;
 		Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
+		clone = Instantiate (prefab, transform.position + forward, transform.rotation) as GameObject;
+		forward = Camera.main.transform.TransformDirection(Vector3.forward);
 		forward = forward.normalized;
-		clone.rigidbody.velocity = (new Vector3(forward.x * magnitude, 0, forward.z * magnitude));
+		clone.rigidbody.velocity = forward * magnitude;//(new Vector3(forward.x * magnitude, 0, forward.z * magnitude));
 	}
 }
