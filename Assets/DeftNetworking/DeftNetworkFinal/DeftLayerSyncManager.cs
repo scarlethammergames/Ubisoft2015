@@ -75,6 +75,10 @@ public class DeftLayerSyncManager : MonoBehaviour
         obj.rigidbody.velocity = Vector3.Lerp(obj.rigidbody.velocity, state.velocity, 0.5f);
         obj.rigidbody.rotation = Quaternion.Slerp(obj.rigidbody.rotation, state.rotation, 0.5f);
         obj.rigidbody.angularVelocity = Vector3.Lerp(obj.rigidbody.angularVelocity, state.angularVelocity, 0.5f);
+        if (debug)
+        {
+            Debug.Log("Moving " + state.id + " to " + state.position.ToString());
+        }
     }
 
     void BuildSyncQueue()
@@ -97,19 +101,24 @@ public class DeftLayerSyncManager : MonoBehaviour
         {
             netView.observed = this;
         }
+        this.objectsInLayer = new Dictionary<int, GameObject> ;
+        this.syncQueue = new Queue<DeftBodyState> ;
     }
 
     void FixedUpdate()
     {
-        if (this.syncQueue.Count > 0)
+        if (Network.isServer)
         {
-            DeftBodyState state = this.syncQueue.Dequeue();
-            state.timestamp = Time.time;
-            this.networkView.RPC("UpdateDeftBodyState", RPCMode.Others, state);
-        }
-        else
-        {
-            BuildSyncQueue();
+            if (this.syncQueue.Count > 0)
+            {
+                DeftBodyState state = this.syncQueue.Dequeue();
+                state.timestamp = Time.time;
+                this.networkView.RPC("UpdateDeftBodyState", RPCMode.Others, state);
+            }
+            else
+            {
+                BuildSyncQueue();
+            }
         }
     }
 }
