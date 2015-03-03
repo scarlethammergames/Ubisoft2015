@@ -10,7 +10,7 @@ public class TestingThrusters : MonoBehaviour {
   {
     Debug.Log("Activating thrusters.");
 
-    this.gameObject.rigidbody.AddForce(this.gameObject.transform.forward * thrusterPower);
+    this.gameObject.rigidbody.AddForce(this.gameObject.transform.forward * thrusterPower, ForceMode.Impulse);
 
   }
 

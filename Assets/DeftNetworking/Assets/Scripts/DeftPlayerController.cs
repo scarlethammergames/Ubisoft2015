@@ -61,6 +61,7 @@ public class DeftPlayerController : MonoBehaviour
         }
         //this.BButton = this.gameObject.GetComponent<TestingThrusters>().Activate;
         Debug.Log("PLAYER IS AWAKE");
+        this.playerHeight = this.GetComponent<CapsuleCollider>().height;
     }
 
 
@@ -161,10 +162,10 @@ public class DeftPlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        //if (this.gamepadState.B)
-        //{
-        //    this.BButton();
-        //}
+        if (this.gamepadState.B)
+        {
+            this.GetComponent<TestingThrusters>().Activate();
+        }
         if (debug)
         {
             foreach (FieldInfo info in this.gameObject.GetComponent<DeftPlayerController>().GetType().GetFields())
