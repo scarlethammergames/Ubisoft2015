@@ -21,6 +21,10 @@ public class Vacuum : MonoBehaviour {
 		trigger = controller.gamepadState.RightTrigger;
 		if (trigger > 0) effect.emit = true;
 		else effect.emit = false;
+
+		//Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
+		//this.transform.LookAt (Camera.main.transform.position);
+		//transform.rotation = Quaternion.LookRotation (-Camera.main.transform.forward, Camera.main.transform.right);
 	}
 
 	void OnTriggerStay(Collider other)
