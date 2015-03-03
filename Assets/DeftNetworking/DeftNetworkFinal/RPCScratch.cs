@@ -69,7 +69,8 @@ public class RPCScratch : MonoBehaviour
                 RPCBodyState state = new RPCBodyState();
                 state.timestamp = i;
                 state.angularVelocity = new Vector3(0f, 1.2f, 4f);
-                this.networkView.RPC("ReceiveBodyState", RPCMode.Others, MarshalBodyState(state));
+                byte[] bytes = MarshalBodyState(state);
+                this.networkView.RPC("ReceiveBodyState", RPCMode.Others, bytes);
             }
         }
         i++;

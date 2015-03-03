@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 public struct DeftBodyState
 {
     public double timestamp;
-    public int id;
+    public NetworkViewID id;
     public Vector3 position;
     public Vector3 velocity;
     public Quaternion rotation;
@@ -17,9 +17,11 @@ public struct DeftBodyState
 public class DeftLayerSyncManager : MonoBehaviour
 {
 
-    public Dictionary<int, GameObject> objectsInLayer;
+    public Dictionary<NetworkViewID, GameObject> objectsInLayer;
     public Queue<DeftBodyState> syncQueue;
     public int layer;
+    public GameObject testingPrefab;
+    public float hardSyncThreshold = 5.0f;
 
     public bool debug;
 
@@ -53,7 +55,7 @@ public class DeftLayerSyncManager : MonoBehaviour
         {
             if (obj.layer == this.layer)
             {
-                this.objectsInLayer[obj.GetInstanceID()] = obj;
+                this.objectsInLayer[obj.networkView.viewID] = obj;
             }
         }
         if (debug)
@@ -66,32 +68,26 @@ public class DeftLayerSyncManager : MonoBehaviour
     public void UpdateDeftBodyState(byte[] bytes)
     {
         DeftBodyState state = UnMarshalDeftBodyState(bytes);
-        FirstOrderSync(this.objectsInLayer[state.id], state);
-    }
-
-    void FirstOrderSync(GameObject obj, DeftBodyState state)
-    {
-        obj.transform.position = Vector3.Lerp(obj.transform.position, state.position, 0.5f);
-        obj.rigidbody.velocity = Vector3.Lerp(obj.rigidbody.velocity, state.velocity, 0.5f);
-        obj.rigidbody.rotation = Quaternion.Slerp(obj.rigidbody.rotation, state.rotation, 0.5f);
-        obj.rigidbody.angularVelocity = Vector3.Lerp(obj.rigidbody.angularVelocity, state.angularVelocity, 0.5f);
-        if (debug)
-        {
-            Debug.Log("Moving " + state.id + " to " + state.position.ToString());
-        }
+        this.objectsInLayer[state.id].GetComponent<DeftSyncWorker>().goalState = state;
+        this.objectsInLayer[state.id].GetComponent<DeftSyncWorker>().StartSync();
     }
 
     void BuildSyncQueue()
     {
-        foreach (KeyValuePair<int, GameObject> entry in this.objectsInLayer)
+        foreach (KeyValuePair<NetworkViewID, GameObject> entry in this.objectsInLayer)
         {
-            DeftBodyState state = new DeftBodyState();
-            state.position = entry.Value.transform.position;
-            state.velocity = entry.Value.rigidbody.velocity;
-            state.rotation = entry.Value.rigidbody.rotation;
-            state.angularVelocity = entry.Value.rigidbody.angularVelocity;
-            state.id = entry.Key;
-            this.syncQueue.Enqueue(state);
+            DeftBodyState lastChecked = entry.Value.GetComponent<DeftSyncWorker>().lastCheckedState;
+            if (DeftBodyStateUtil.Difference(entry.Value, lastChecked) > 1.0f || Time.time - lastChecked.timestamp > this.hardSyncThreshold)
+            {
+                lastChecked = DeftBodyStateUtil.BuildState(entry.Value);
+                DeftBodyState state = new DeftBodyState();
+                state.id = entry.Key;
+                this.syncQueue.Enqueue(state);
+            }
+        }
+        if (debug)
+        {
+            Debug.Log("Sync queue rebuilt with " + this.syncQueue.Count + " objects ready to sync.");
         }
     }
 
@@ -101,8 +97,9 @@ public class DeftLayerSyncManager : MonoBehaviour
         {
             netView.observed = this;
         }
-        this.objectsInLayer = new Dictionary<int, GameObject> ;
-        this.syncQueue = new Queue<DeftBodyState> ;
+        this.objectsInLayer = new Dictionary<NetworkViewID, GameObject>();
+        this.syncQueue = new Queue<DeftBodyState>();
+        this.SetObjectsInLayer();
     }
 
     void FixedUpdate()
@@ -112,8 +109,17 @@ public class DeftLayerSyncManager : MonoBehaviour
             if (this.syncQueue.Count > 0)
             {
                 DeftBodyState state = this.syncQueue.Dequeue();
+                state.position = this.objectsInLayer[state.id].transform.position;
+                state.velocity = this.objectsInLayer[state.id].rigidbody.velocity;
+                state.rotation = this.objectsInLayer[state.id].rigidbody.rotation;
+                state.angularVelocity = this.objectsInLayer[state.id].rigidbody.angularVelocity;
                 state.timestamp = Time.time;
-                this.networkView.RPC("UpdateDeftBodyState", RPCMode.Others, state);
+                byte[] bytes = this.MarshallDeftBodyState(state);
+                if (debug)
+                {
+                    Debug.Log("Sending " + state.id.ToString());
+                }
+                this.networkView.RPC("UpdateDeftBodyState", RPCMode.Others, bytes);
             }
             else
             {
