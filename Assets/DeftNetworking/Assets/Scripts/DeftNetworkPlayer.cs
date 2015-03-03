@@ -4,9 +4,6 @@ using System.Collections;
 public class DeftNetworkPlayer : MonoBehaviour
 {
 
-    public enum DeftRigidBodyType { PLAYER, PHYSICSOBJECT };
-
-    public DeftRigidBodyType type;
     public double m_InterpolationBackTime = 0.1;
     public double m_ExtrapolationLimit = 0.5;
 
