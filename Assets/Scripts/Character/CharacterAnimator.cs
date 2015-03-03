@@ -14,8 +14,7 @@ public class CharacterAnimator : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		_animator = this.GetComponent<Animator>();
-		_animator.SetBool("isIdle", true);
-		_animator.SetBool("isRunning", false);
+		transition(0);
 		_controller = this.GetComponent<DeftPlayerController>();
     	_rb = this.GetComponent<Rigidbody>();
 	}
