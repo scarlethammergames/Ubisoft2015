@@ -27,7 +27,7 @@ public class Vacuum : MonoBehaviour {
 	{
 		trigger = controller.gamepadState.RightTrigger;
 		if (trigger > 0) {
-			if (other.rigidbody.useGravity) {
+			if (other.rigidbody.useGravity && other.tag != "Player") {
 				PhysicsStatus status = other.gameObject.GetComponent<PhysicsStatus> ();
 				Vector3 direction = Vector3.Normalize (other.transform.position - this.transform.parent.position);
 				if (status == null || status.pullable || affectEverything) {
