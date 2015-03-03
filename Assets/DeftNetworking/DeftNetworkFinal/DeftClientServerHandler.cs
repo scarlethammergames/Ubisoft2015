@@ -1,70 +1,82 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DeftClientServerHandler : MonoBehaviour {
+public class DeftClientServerHandler : MonoBehaviour
+{
 
-  public enum DeftNetworkRole { SEARCHER, CLIENT, WILLHOST, UNASSIGNED, HOST };
-  public DeftNetworkRole currentRole = DeftNetworkRole.UNASSIGNED;
+    public enum DeftNetworkRole { SEARCHER, CLIENT, WILLHOST, UNASSIGNED, HOST };
+    public DeftNetworkRole currentRole = DeftNetworkRole.UNASSIGNED;
 
-  public bool LAN = true;
-  public int numberConnections = 4;
-  public int port = 2500;
+    public bool LAN = true;
+    public int numberConnections = 4;
+    public int port = 2500;
 
-  public string gameName = "4f5re3";
-  public string roomName = "15e6fs";
-  public string serverAddress = "127.0.0.1";
+    public string gameName = "4f5re3";
+    public string roomName = "15e6fs";
+    public string serverAddress = "127.0.0.1";
 
-  HostData[] hostdata;
+    HostData[] hostdata;
 
-  void Start()
-  {
-    Application.runInBackground = true;
-  }
-
-  void OnGUI()
-  {
-    if (!Network.isClient && !Network.isServer)
+    void Start()
     {
-      if (GUI.Button(new Rect(10, 10, 150, 50), "Join Server"))
-      {
-        this.currentRole = DeftNetworkRole.SEARCHER;
-      }
-      if (GUI.Button(new Rect(10, 70, 150, 50), "Host Server"))
-      {
-        this.currentRole = DeftNetworkRole.WILLHOST;
-      }
+        Application.runInBackground = true;
     }
-  }
 
-  void Update()
-  {
-    switch (this.currentRole)
+    void OnGUI()
     {
-      case DeftNetworkRole.WILLHOST:
-        Network.InitializeServer(this.numberConnections, this.port, !this.LAN);
-        MasterServer.RegisterHost(this.gameName, this.roomName);
-        this.currentRole = DeftNetworkRole.HOST;
-        break;
-      case DeftNetworkRole.SEARCHER:
-        MasterServer.RequestHostList(this.gameName);
-        HostData[] hostdata = MasterServer.PollHostList();
-        if (hostdata.Length > 0)
+        if (!Network.isClient && !Network.isServer)
         {
-          Network.Connect(hostdata[0]);
+            if (GUI.Button(new Rect(10, 10, 150, 50), "Join Server"))
+            {
+                this.currentRole = DeftNetworkRole.SEARCHER;
+            }
+            if (GUI.Button(new Rect(10, 70, 150, 50), "Host Server"))
+            {
+                this.currentRole = DeftNetworkRole.WILLHOST;
+            }
+            if (this.currentRole == DeftNetworkRole.SEARCHER)
+            {
+                for (int i = 0; i < hostdata.Length; i++)
+                {
+                    if (GUI.Button(new Rect(160, 10 + 50 * i, 150, 50), hostdata[i].gameName))
+                    {
+                        Network.Connect(this.hostdata[i]);
+                    }
+                }
+            }
         }
-        break;
     }
-  }
+
+    void Update()
+    {
+        switch (this.currentRole)
+        {
+            case DeftNetworkRole.WILLHOST:
+                Network.InitializeServer(this.numberConnections, this.port, !this.LAN);
+                MasterServer.RegisterHost(this.gameName, this.roomName);
+                this.currentRole = DeftNetworkRole.HOST;
+                break;
+            case DeftNetworkRole.SEARCHER:
+                MasterServer.RequestHostList(this.gameName);
+                hostdata = MasterServer.PollHostList();
+                if (hostdata.Length > 0)
+                {
+                    //Debug.Log("Connecting to " + hostdata[0].ToString());
+                    //Network.Connect(hostdata[0]);
+                }
+                break;
+        }
+    }
 
 
-  void OnFailedToConnect(NetworkConnectionError error)
-  {
-    Debug.Log("Could not connect to server: " + error);
-  }
+    void OnFailedToConnect(NetworkConnectionError error)
+    {
+        Debug.Log("Could not connect to server: " + error);
+    }
 
-  void OnConnectedToServer()
-  {
-    Debug.Log("Successfully connected to server.");
-    this.currentRole = DeftNetworkRole.CLIENT;
-  }
+    void OnConnectedToServer()
+    {
+        Debug.Log("Successfully connected to server.");
+        this.currentRole = DeftNetworkRole.CLIENT;
+    }
 }
