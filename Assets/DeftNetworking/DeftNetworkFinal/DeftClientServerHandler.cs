@@ -54,7 +54,6 @@ public class DeftClientServerHandler : MonoBehaviour
             case DeftNetworkRole.WILLHOST:
                 Network.InitializeServer(this.numberConnections, this.port, !this.LAN);
                 MasterServer.RegisterHost(this.gameName, this.roomName);
-                this.currentRole = DeftNetworkRole.HOST;
                 break;
             case DeftNetworkRole.SEARCHER:
                 MasterServer.RequestHostList(this.gameName);
@@ -74,9 +73,19 @@ public class DeftClientServerHandler : MonoBehaviour
         Debug.Log("Could not connect to server: " + error);
     }
 
+    void OnServerInitialized()
+    {
+        Debug.Log("Successfully initialized server.");
+        this.currentRole = DeftNetworkRole.HOST;
+        this.GetComponent<PlayerSelect>().selectedPlayer = this.GetComponent<PlayerSelect>().playerTypeA;
+        this.GetComponent<PlayerSelect>().SpawnPlayer();
+    }
+
     void OnConnectedToServer()
     {
         Debug.Log("Successfully connected to server.");
         this.currentRole = DeftNetworkRole.CLIENT;
+        this.GetComponent<PlayerSelect>().selectedPlayer = this.GetComponent<PlayerSelect>().playerTypeB;
+        this.GetComponent<PlayerSelect>().SpawnPlayer();
     }
 }

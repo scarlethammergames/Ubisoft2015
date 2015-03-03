@@ -24,7 +24,7 @@ public class DeftNetworkPlayer : MonoBehaviour
     State[] m_BufferedState = new State[20];
     int m_TimestampCount;
 
-    void Start()
+    void Awake()
     {
         foreach (NetworkView n in GetComponents<NetworkView>())
             n.observed = this;
