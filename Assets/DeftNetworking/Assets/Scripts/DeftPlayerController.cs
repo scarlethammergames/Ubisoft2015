@@ -220,21 +220,23 @@ public class DeftPlayerController : MonoBehaviour
                     break;
                 }
         }
-
-        // change forward direction
-        Vector3 last_input_without_y = new Vector3(last_input.x, 0, last_input.z);
-        Vector3 forward_without_y = new Vector3(transform.forward.x, 0, transform.forward.z);
-
-        transform.forward = Vector3.Lerp(forward_without_y, last_input_without_y, smooth * Time.deltaTime);
-
-        //this.rigidbody.AddForce(this.move_direction * speed_current);
-        Vector3 move_without_y = new Vector3(this.move_direction.x, 0, this.move_direction.z);
-        this.rigidbody.velocity = new Vector3(move_direction.x * speed_current, rigidbody.velocity.y, move_direction.z * speed_current);
-
-        // THIS IS A MASSIVE HACK VERY BAD WILL FIX SOON AFTER I GET SOME MILK!!
-        if (this.controllerMoveDirection.x == 0 && this.controllerMoveDirection.y == 0)
+        if (CalculateGrounded())
         {
-            this.rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
+            // change forward direction
+            Vector3 last_input_without_y = new Vector3(last_input.x, 0, last_input.z);
+            Vector3 forward_without_y = new Vector3(transform.forward.x, 0, transform.forward.z);
+
+            transform.forward = Vector3.Lerp(forward_without_y, last_input_without_y, smooth * Time.deltaTime);
+
+            //this.rigidbody.AddForce(this.move_direction * speed_current);
+            Vector3 move_without_y = new Vector3(this.move_direction.x, 0, this.move_direction.z);
+            this.rigidbody.velocity = new Vector3(move_direction.x * speed_current, rigidbody.velocity.y, move_direction.z * speed_current);
+
+            // THIS IS A MASSIVE HACK VERY BAD WILL FIX SOON AFTER I GET SOME MILK!!
+            if (this.controllerMoveDirection.x == 0 && this.controllerMoveDirection.y == 0)
+            {
+                this.rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
+            }
         }
     }
 
@@ -244,9 +246,9 @@ public class DeftPlayerController : MonoBehaviour
     }
 
 
-    public bool CalculateIsGrounuded()
+    public bool CalculateGrounded()
     {
-        return Physics.Raycast(transform.position, Vector3.down, (this.playerHeight / 2.0f) + 0.05f);
+        return Physics.Raycast(transform.position, Vector3.down, (this.playerHeight / 2.0f) + 0.1f);
     }
 
 }
