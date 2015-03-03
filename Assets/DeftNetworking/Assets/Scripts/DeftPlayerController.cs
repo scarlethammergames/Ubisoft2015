@@ -162,10 +162,14 @@ public class DeftPlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (this.gamepadState.B)
+        if (this.gamepadState != null)
         {
-            this.GetComponent<TestingThrusters>().Activate();
+            if (this.gamepadState.B)
+            {
+                this.GetComponent<TestingThrusters>().Activate();
+            }
         }
+
         if (debug)
         {
             foreach (FieldInfo info in this.gameObject.GetComponent<DeftPlayerController>().GetType().GetFields())
@@ -238,6 +242,11 @@ public class DeftPlayerController : MonoBehaviour
             {
                 this.rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
             }
+        }
+        else
+        {
+            Vector3 forward_input = new Vector3(transform.forward.x, last_input.y, transform.forward.z);
+            transform.forward = Vector3.Lerp(forward_input, last_input, smooth * Time.deltaTime);
         }
     }
 

@@ -8,10 +8,7 @@ public class TestingThrusters : MonoBehaviour {
   [RPC]
   public void Activate()
   {
-    Debug.Log("Activating thrusters.");
-
     this.gameObject.rigidbody.AddForce(this.gameObject.transform.forward * thrusterPower, ForceMode.Impulse);
-
   }
 
 }
