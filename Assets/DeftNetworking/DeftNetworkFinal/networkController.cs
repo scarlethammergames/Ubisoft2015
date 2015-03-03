@@ -149,7 +149,7 @@
 //    }
 	
 //  [RPC]
-//  void ClientUpdatePlayer(Vector3 pos, NetworkMessageInfo info)
+//  void ClientUpdatePlayer(Vector3 position, NetworkMessageInfo info)
 //  {
 //    // a client is sending us a position update
 //    // normally you would do a lot of bounds checking here
@@ -158,16 +158,16 @@
 		
 		
 //    NetworkPlayer p = info.sender;
-//    networkView.RPC("ServerUpdatePlayer",RPCMode.Others, p, pos);
+//    networkView.RPC("ServerUpdatePlayer",RPCMode.Others, p, position);
 	
 //    // now update it for myself the server
 		
-//    ServerUpdatePlayer(p, pos);
+//    ServerUpdatePlayer(p, position);
 		
 //  }
 	
 //  [RPC]
-//  void ServerUpdatePlayer(NetworkPlayer p, Vector3 pos)
+//  void ServerUpdatePlayer(NetworkPlayer p, Vector3 position)
 //  {
 //    // the server is telling us to update a player
 //    // again, normally you would do a lot of bounds
@@ -176,7 +176,7 @@
 //    if(players.ContainsKey(p))
 //    {
 //      GameObject gop = (GameObject)players[p];
-//      gop.GetComponent<playerController>().target = pos;
+//      gop.GetComponent<playerController>().target = position;
 //    }
 		
 //  }
@@ -201,18 +201,18 @@
 //    }
 	
 //  [RPC]
-//  void JoinPlayer(NetworkViewID newPlayerView, Vector3 pos, NetworkPlayer p)
+//  void JoinPlayer(NetworkViewID newPlayerView, Vector3 position, NetworkPlayer p)
 //  {
 //    // instantiate the prefab
 //    // and set some of its properties
 		
-//    GameObject newPlayer = Instantiate(playerPrefab, pos, Quaternion.identity) as GameObject;
+//    GameObject newPlayer = Instantiate(playerPrefab, position, Quaternion.identity) as GameObject;
 //    newPlayer.GetComponent<NetworkView>().viewID = newPlayerView;
 //    newPlayer.tag = "Player";
 		
 //    // set the remote player's target to its current location
 //    // so that non-moving remote player don't move to the origin
-//    newPlayer.GetComponent<playerController>().target = pos;
+//    newPlayer.GetComponent<playerController>().target = position;
 		
 //    // most importantly, populate the NetworkPlayer
 //    // structure with the data received from the player

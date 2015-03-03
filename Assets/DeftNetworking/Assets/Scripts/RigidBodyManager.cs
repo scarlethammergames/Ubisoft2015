@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public enum SyncHandler { snap, simplesmoothing, firstorder, secondorder, adaptivehigherorder };
 
-public struct DeftRigidBodyState
+public struct BodyState
 {
   public double timestamp;
   public Vector3 pos;
@@ -17,7 +17,7 @@ public class RigidBodyManager : MonoBehaviour
 
   public Dictionary<int, GameObject> objectDictionary;
   public Queue<GameObject> objectsToSync;
-  public Dictionary<GameObject, DeftRigidBodyState> objecToState;
+  public Dictionary<GameObject, BodyState> objecToState;
   public HashSet<GameObject> allTrackedObjects;
 
   // syncs in order of priority
@@ -153,7 +153,7 @@ public class RigidBodyManager : MonoBehaviour
     obj.rigidbody.angularVelocity = Vector3.Lerp(obj.rigidbody.angularVelocity, angular_velocity, 0.5f);
   }
 
-  void PHBRSync(DeftRigidBodyState[] states)
+  void PHBRSync(BodyState[] states)
   {
     // assuming states in correct order
     // assuming timesteps approximately equal
@@ -166,7 +166,7 @@ public class RigidBodyManager : MonoBehaviour
     {
       float d1 = (float)(states[0].timestamp - states[1].timestamp);
       float d2 = (float)(states[1].timestamp - states[2].timestamp);
-      DeftRigidBodyState update = new DeftRigidBodyState();
+      BodyState update = new BodyState();
       float tmp1 = 2 * d1 * d1 / d2 / (d1 + d2);
       float tmp2 = 2 * d1 / d2 + 1;
       float tmp3 = 2 * d1 / (d1 + d2) + 1;
