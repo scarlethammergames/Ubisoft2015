@@ -34,13 +34,14 @@ public class DeftSyncWorker : MonoBehaviour
 
     void FirstOrderSync(DeftBodyState state)
     {
-        this.gameObject.transform.position = Vector3.Lerp(this.gameObject.transform.position, state.position, this.duration);
-        this.gameObject.rigidbody.velocity = Vector3.Lerp(this.gameObject.rigidbody.velocity, state.velocity, this.duration);
-        this.gameObject.rigidbody.rotation = Quaternion.Slerp(this.gameObject.rigidbody.rotation, state.rotation, this.duration);
-        this.gameObject.rigidbody.angularVelocity = Vector3.Lerp(this.gameObject.rigidbody.angularVelocity, state.angularVelocity, 2f);
+        float lerpSpeed = this.duration / Time.fixedDeltaTime;
+        this.gameObject.transform.position = Vector3.Lerp(this.gameObject.transform.position, state.position, lerpSpeed);
+        this.gameObject.rigidbody.velocity = Vector3.Lerp(this.gameObject.rigidbody.velocity, state.velocity, lerpSpeed);
+        this.gameObject.rigidbody.rotation = Quaternion.Slerp(this.gameObject.rigidbody.rotation, state.rotation, lerpSpeed);
+        this.gameObject.rigidbody.angularVelocity = Vector3.Lerp(this.gameObject.rigidbody.angularVelocity, state.angularVelocity, lerpSpeed);
         if (debug)
         {
-            Debug.Log("Moving " + state.id + " to " + state.position.ToString());
+            Debug.Log(durationTmp + ": moving " + state.id + " to " + state.position.ToString());
         }
     }
 }

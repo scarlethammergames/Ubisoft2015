@@ -79,10 +79,19 @@ public class DeftLayerSyncManager : MonoBehaviour
             DeftBodyState lastChecked = entry.Value.GetComponent<DeftSyncWorker>().lastCheckedState;
             if (DeftBodyStateUtil.Difference(entry.Value, lastChecked) > 1.0f || Time.time - lastChecked.timestamp > this.hardSyncThreshold)
             {
-                lastChecked = DeftBodyStateUtil.BuildState(entry.Value);
-                DeftBodyState state = new DeftBodyState();
-                state.id = entry.Key;
-                this.syncQueue.Enqueue(state);
+                if (debug)
+                {
+                    Debug.Log("Syncing with " + (Time.time - lastChecked.timestamp) + " seconds passed and distance difference of " + DeftBodyStateUtil.Difference(entry.Value, lastChecked));
+                }
+                entry.Value.GetComponent<DeftSyncWorker>().lastCheckedState = DeftBodyStateUtil.BuildState(entry.Value);
+                this.syncQueue.Enqueue(lastChecked);
+            }
+            else
+            {
+                if (debug)
+                {
+                    Debug.Log("No need to sync " + lastChecked.id.ToString());
+                }
             }
         }
         if (debug)
@@ -108,12 +117,7 @@ public class DeftLayerSyncManager : MonoBehaviour
         {
             if (this.syncQueue.Count > 0)
             {
-                DeftBodyState state = this.syncQueue.Dequeue();
-                state.position = this.objectsInLayer[state.id].transform.position;
-                state.velocity = this.objectsInLayer[state.id].rigidbody.velocity;
-                state.rotation = this.objectsInLayer[state.id].rigidbody.rotation;
-                state.angularVelocity = this.objectsInLayer[state.id].rigidbody.angularVelocity;
-                state.timestamp = Time.time;
+                DeftBodyState state = DeftBodyStateUtil.BuildState(this.objectsInLayer[this.syncQueue.Dequeue().id]);
                 byte[] bytes = this.MarshallDeftBodyState(state);
                 if (debug)
                 {
