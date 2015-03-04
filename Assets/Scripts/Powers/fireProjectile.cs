@@ -53,7 +53,7 @@ public class fireProjectile: MonoBehaviour {
 		_cooldownTimer -= Time.deltaTime;
 
 		if(_parent){
-			this.transform.position = _parent.transform.position + _offset;
+			this.transform.position = _parent.transform.position;
 		}
 
 		bool leftTriggerHeld = (GamePad.GetTrigger (GamePad.Trigger.LeftTrigger, _padIndex) > _triggerThreshold);
@@ -150,8 +150,7 @@ public class fireProjectile: MonoBehaviour {
 			clone.transform.parent = this.transform;
 		}
 	}
-
-	[RPC]
+	
 	void FireBeam(){
 		RaycastHit hit;
 		float beamRange = 500;
@@ -162,21 +161,21 @@ public class fireProjectile: MonoBehaviour {
 			_controlledProjectile = Instantiate( _projectile, this.transform.position, Quaternion.identity ) as GameObject;
 			_alreadyFired = true;
 		}
-		_controlledProjectile.transform.position = this.transform.position;
+		_controlledProjectile.transform.position = this.transform.position + _offset;
 
 		float currentDistanceFiring = 5;
 		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward).normalized;
 		if(Physics.Raycast(Camera.main.transform.position, cameraForward, out hit, beamRange)){
 			currentDistanceFiring = Vector3.Distance(hit.point, this.transform.position);
 			_controlledProjectile.transform.LookAt(hit.point);
-			//_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
+			_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
+			_controlledProjectile.transform.localScale = new Vector3(beamDiameter, currentDistanceFiring * beamDistanceMagnifier, beamDiameter);
 		}
 		else{
 			_controlledProjectile.transform.LookAt(_controlledProjectile.transform.position + cameraForward);
+			_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
+			_controlledProjectile.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
 		}
-		_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
-
-		_controlledProjectile.transform.localScale = new Vector3(beamDiameter, currentDistanceFiring * beamDistanceMagnifier, beamDiameter);
 
 		if(Network.isClient || Network.isServer){
 			networkView.RPC("LaserBeam", RPCMode.All, _controlledProjectile.transform.position, 
