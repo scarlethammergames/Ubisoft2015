@@ -156,22 +156,26 @@ public class fireProjectile: MonoBehaviour {
 		RaycastHit hit;
 		float beamRange = 500;
 		float beamDiameter = 3;
-		float beamDistanceMagnifier = 4.5f;
-
-		float currentDistanceFiring = 5;
-		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward).normalized;
-		if(Physics.Raycast(Camera.main.transform.position, cameraForward, out hit, beamRange)){
-			currentDistanceFiring = Vector3.Distance(hit.point, this.transform.position);
-		}
+		float beamDistanceMagnifier = 5.0f;
 
 		if(!_alreadyFired){
 			_controlledProjectile = Instantiate( _projectile, this.transform.position, Quaternion.identity ) as GameObject;
 			_alreadyFired = true;
 		}
-
 		_controlledProjectile.transform.position = this.transform.position;
-		_controlledProjectile.transform.LookAt(hit.point);
+
+		float currentDistanceFiring = 5;
+		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward).normalized;
+		if(Physics.Raycast(Camera.main.transform.position, cameraForward, out hit, beamRange)){
+			currentDistanceFiring = Vector3.Distance(hit.point, this.transform.position);
+			_controlledProjectile.transform.LookAt(hit.point);
+			//_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
+		}
+		else{
+			_controlledProjectile.transform.LookAt(_controlledProjectile.transform.position + cameraForward);
+		}
 		_controlledProjectile.transform.RotateAround(this.transform.position, _controlledProjectile.transform.right, -90);
+
 		_controlledProjectile.transform.localScale = new Vector3(beamDiameter, currentDistanceFiring * beamDistanceMagnifier, beamDiameter);
 
 		if(Network.isClient || Network.isServer){
