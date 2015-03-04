@@ -10,6 +10,7 @@ public class Ocean : MonoBehaviour
 	public float m_length = 64;
 	public float m_waveAmp = 0.0002f; // phillips spectrum parameter -- affects heights of waves
 	public Vector2 m_windSpeed = new Vector2(32.0f,32.0f);
+	public bool m_createCollider = false; //MOJ addition
 	
 	GameObject[] m_oceanGrid;
 	Mesh m_mesh;
@@ -71,6 +72,8 @@ public class Ocean : MonoBehaviour
 				m_oceanGrid[idx].GetComponent<MeshFilter>().mesh = m_mesh;
 				m_oceanGrid[idx].transform.Translate(new Vector3(x * m_length - m_numGridsX*m_length/2, 0.0f, z * m_length - m_numGridsZ*m_length/2));
 				m_oceanGrid[idx].transform.parent = this.transform;
+				m_oceanGrid[idx].layer = m_oceanGrid[idx].transform.parent.gameObject.layer; //MOJ Addition
+				if(m_createCollider) m_oceanGrid[idx].AddComponent<MeshCollider>();  //MOJ Addition
 			}
 		}
 	

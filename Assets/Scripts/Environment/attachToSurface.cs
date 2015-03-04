@@ -17,7 +17,7 @@ public class attachToSurface : MonoBehaviour {
 	public Vector3 rotationOffset; 
 
 	public bool attachToTriangle = false;
-	public bool spawnObjectOnStart = true;
+	public bool spawnObjectOnStart = false;
 	
 	public struct Triangle{
 		public Vector3 position;
