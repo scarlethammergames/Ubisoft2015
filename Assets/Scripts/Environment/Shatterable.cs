@@ -16,7 +16,6 @@ public class Shatterable : MonoBehaviour {
 	}
 
     void OnCollisionEnter(Collision col) {
-		Debug.Log("hit!");
 		if (col.rigidbody) {
 			float velocity = col.rigidbody.velocity.sqrMagnitude;
 			if (velocity > _velocityThreshold)

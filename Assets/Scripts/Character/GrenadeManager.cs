@@ -26,7 +26,7 @@ public class GrenadeManager : MonoBehaviour {
 
 	void Update () 
 	{
-		trigger = controller.gamepadState.RightShoulder;
+		trigger = controller.gamepadState.RightShoulder || (controller.gamepadState.RightTrigger > 0.20f);
 		cooldown -= Time.deltaTime;
 
 		if (trigger && cooldown<=0.0)
