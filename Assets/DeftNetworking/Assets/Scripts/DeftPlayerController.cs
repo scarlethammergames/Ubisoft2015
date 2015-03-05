@@ -205,8 +205,7 @@ public class DeftPlayerController : MonoBehaviour
         {
           if (speed_current > 0)
           {
-           // rigidbody.velocity = new Vector3(0, jumpHeight, 0);
-            rigidbody.AddForce((new Vector3(0, this.jumpHeight, 0) - Physics.gravity) * this.rigidbody.mass, ForceMode.Impulse);
+            rigidbody.velocity += new Vector3(0, jumpHeight, 0);
           }
           break;
         }
