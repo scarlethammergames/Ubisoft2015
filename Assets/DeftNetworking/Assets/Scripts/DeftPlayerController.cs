@@ -239,11 +239,11 @@ public class DeftPlayerController : MonoBehaviour
       this.rigidbody.velocity = new Vector3(move_direction.x * speed_current, rigidbody.velocity.y, move_direction.z * speed_current);
       // this.rigidbody.AddForce(move_without_y * this.rigidbody.mass, ForceMode.Impulse);
 
-      // THIS IS A MASSIVE HACK VERY BAD WILL FIX SOON AFTER I GET SOME MILK!!
-      if (this.controllerMoveDirection.x == 0 && this.controllerMoveDirection.y == 0)
-      {
-        this.rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
-      }
+      //// THIS IS A MASSIVE HACK VERY BAD WILL FIX SOON AFTER I GET SOME MILK!!
+      //if (this.controllerMoveDirection.x == 0 && this.controllerMoveDirection.y == 0)
+      //{
+      //  this.rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
+      //}
     }
     else
     {
