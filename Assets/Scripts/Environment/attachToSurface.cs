@@ -48,7 +48,7 @@ public class attachToSurface : MonoBehaviour {
 				m_hitTriangle = updateTriangleHit( hit, m_hitTriangle );
 				surfaceObject.transform.position = Vector3.Lerp( surfaceObject.transform.position, m_hitTriangle.position + positionOffset, followSmoothing*Time.deltaTime);
 				surfaceObject.transform.eulerAngles = m_hitTriangle.normal * rotationMultiplier;
-				Debug.Log("Tri:" + m_hitTriangle.position);
+				//Debug.Log("Tri:" + m_hitTriangle.position);
 				displaySurfaceRays( hit );
 			}
 			else{

@@ -75,11 +75,7 @@ public class fireProjectile: MonoBehaviour {
 					break;
 
 				case ProjectileAction.BEAM:
-					if(Network.isClient || Network.isServer){
-						networkView.RPC("FireBeam", RPCMode.All);
-					}else{
-						FireBeam ();
-					}
+					FireBeam ();
 					break;
 
 				case ProjectileAction.REMOTE_CTRL:
