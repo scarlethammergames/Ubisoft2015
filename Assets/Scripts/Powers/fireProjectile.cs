@@ -207,7 +207,7 @@ public class fireProjectile: MonoBehaviour {
 	void MoveControllable(){
 		_controller.controllerMoveDirection = Vector2.zero;
 		//Get controller direction
-		if (_controller.useGamepad){
+		if (_controller.gamepadState != null){
 			_controller.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, _padIndex);
 			_controller.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, _padIndex);
 		}else{

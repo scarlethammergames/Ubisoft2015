@@ -27,13 +27,15 @@ public class DeftPlayerController : MonoBehaviour
   public float smoothingTurn = 2.0f;
   public float smoothingAim = 5.0f;
 
+  public Vector2 controllerLookDirection;
+  public Vector2 controllerMoveDirection;
+
   public float smooth = 20f;
 
   public float playerHeight;
   public float playerWidth;
 
   public bool debug;
-  public bool useGamepad = true;
   public bool singlePlayer;
 
   public bool isGrounded;
@@ -64,46 +66,24 @@ public class DeftPlayerController : MonoBehaviour
     this.playerHeight = this.GetComponent<CapsuleCollider>().height;
   }
 
-
-
-  /// <summary>
-  /// Variables stored here for performance purposes and if anothere class would like to observe.
-  /// </summary>
-  public bool controllerJump;
-  public bool controllerRun;
-  public bool controllerSprint;
-  public float controllerAim;
-  public Vector2 controllerMoveDirection;
-  public Vector2 controllerLookDirection;
-  public Vector2 dpadDown;
-
   public GamepadState gamepadState;
 
   void Update()
   {
     if (networkView.isMine || singlePlayer)
     {
-      if (useGamepad)
+      bool gamePadExists = true;
+      this.gamepadState = GamePad.GetState(this.pad_index);
+      if (this.gamepadState == null)
       {
-        this.gamepadState = GamePad.GetState(this.pad_index);
-        controllerJump = GamePad.GetButtonDown(GamePad.Button.A, pad_index);
-        controllerRun = GamePad.GetButton(GamePad.Button.LeftStick, pad_index);
-        controllerSprint = GamePad.GetButton(GamePad.Button.RightStick, pad_index);
-        controllerAim = GamePad.GetTrigger(GamePad.Trigger.LeftTrigger, pad_index);
-        dpadDown = GamePad.GetAxis(GamePad.Axis.Dpad, pad_index);
-      }
-      else
-      {
-        controllerJump = Input.GetKeyDown(KeyCode.Space);
-        controllerRun = Input.GetKey(KeyCode.LeftShift);
-        controllerSprint = Input.GetKey(KeyCode.C);
-        //controllerAim = Input.GetMouseButton(1);
+        gamePadExists = false;
+        this.gamepadState = new GamepadState();
       }
 
       invertTimer += Time.deltaTime;
 
       // invert y axis if down on dpad is pressed
-      if (dpadDown.y < 0 && invertTimer > 1)
+      if (this.gamepadState.dPadAxis.y < 0 && invertTimer > 1)
       {
         if (inverted)
           inverted = false;
@@ -115,23 +95,23 @@ public class DeftPlayerController : MonoBehaviour
 
       #region PlayerState
 
-      if (controllerAim > 0.20f)
+      if (this.gamepadState.LeftTrigger > 0.20f || Input.GetMouseButtonDown(1))
       {
         this.state = PlayerState.aiming;
       }
-      else if (controllerJump)
+      else if (this.gamepadState.A || Input.GetKeyDown(KeyCode.Space))
       {
         this.state = PlayerState.jumping;
       }
-      else if (controllerSprint && controllerRun)
+      else if (this.gamepadState.LeftStick && this.gamepadState.RightStick)
       {
         this.state = PlayerState.sprinting;
       }
-      else if (controllerRun)
+      else if (this.gamepadState.LeftStick)
       {
         this.state = PlayerState.running;
       }
-      else if (this.controllerMoveDirection.sqrMagnitude > 0.20f)
+      else if (this.gamepadState.LeftStickAxis.sqrMagnitude > 0.20f)
       {
         this.state = PlayerState.walking;
       }
@@ -144,7 +124,7 @@ public class DeftPlayerController : MonoBehaviour
 
       this.controllerMoveDirection = new Vector3(0, 0, 0);
       this.controllerLookDirection = new Vector3(0, 0, 0);
-      if (useGamepad)
+      if (gamePadExists)
       {
         this.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, pad_index);
         this.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, pad_index);
@@ -162,14 +142,6 @@ public class DeftPlayerController : MonoBehaviour
 
   void FixedUpdate()
   {
-    if (this.gamepadState != null)
-    {
-      if (this.gamepadState.B)
-      {
-        this.GetComponent<TestingThrusters>().Activate();
-      }
-    }
-
     if (debug)
     {
       foreach (FieldInfo info in this.gameObject.GetComponent<DeftPlayerController>().GetType().GetFields())
