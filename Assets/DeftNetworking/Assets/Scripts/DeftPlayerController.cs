@@ -201,7 +201,6 @@ public class DeftPlayerController : MonoBehaviour
       Vector3 forward_input = new Vector3(transform.forward.x, last_input.y, transform.forward.z);
       transform.forward = Vector3.Lerp(forward_input, last_input, smooth * Time.deltaTime);
     }
-
   }
 
   public void Animate()

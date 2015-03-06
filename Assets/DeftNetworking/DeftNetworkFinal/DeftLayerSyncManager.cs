@@ -24,7 +24,7 @@ public class DeftLayerSyncManager : MonoBehaviour
 
   public bool debug;
 
-  byte[] MarshallDeftBodyState(DeftBodyState state)
+  public static byte[] MarshallDeftBodyState(DeftBodyState state)
   {
     int size = Marshal.SizeOf(state);
     byte[] arr = new byte[size];
@@ -35,7 +35,7 @@ public class DeftLayerSyncManager : MonoBehaviour
     return arr;
   }
 
-  DeftBodyState UnMarshalDeftBodyState(byte[] arr)
+  public static DeftBodyState UnMarshalDeftBodyState(byte[] arr)
   {
     DeftBodyState state = new DeftBodyState();
     int size = Marshal.SizeOf(state);
@@ -118,7 +118,7 @@ public class DeftLayerSyncManager : MonoBehaviour
       if (this.syncQueue.Count > 0)
       {
         DeftBodyState state = DeftBodyStateUtil.BuildState(this.objectsInLayer[this.syncQueue.Dequeue().id]);
-        byte[] bytes = this.MarshallDeftBodyState(state);
+        byte[] bytes = MarshallDeftBodyState(state);
         if (debug)
         {
           Debug.Log("Sending " + state.id.ToString());
