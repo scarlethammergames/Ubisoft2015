@@ -42,10 +42,14 @@ public class AI_Mover : MonoBehaviour {
 	protected void move()
 	{
 
-		if(this.waypoint.position != null)
+		if(this.waypoint == null)
 		{
-			this.agent.SetDestination (this.waypoint.position);
+
+			return;
+
 		}
+
+		this.agent.SetDestination (this.waypoint.position);
 	
 	}
 
