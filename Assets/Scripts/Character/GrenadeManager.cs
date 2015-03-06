@@ -80,9 +80,10 @@ public class GrenadeManager : MonoBehaviour
         cooldown = triggerCooldown;
         if (currentAmmo > 0)
         {
-          byte[] state = MarshallGrenadeThrowParameters(BuildGrenadeThrowParameters());
-          networkView.RPC("throwGrenade", RPCMode.Others);
-          throwGrenade();
+          //byte[] state = MarshallGrenadeThrowParameters(BuildGrenadeThrowParameters());
+          GrenadeThrowParameters state = BuildGrenadeThrowParameters();
+          networkView.RPC("throwGrenade", RPCMode.Others, state.forward, state.position, state.rotation);
+          throwGrenade(this.transform.forward, this.transform.position, this.transform.rotation);
           currentAmmo--;
         }
       }
@@ -104,11 +105,10 @@ public class GrenadeManager : MonoBehaviour
   }
 
   [RPC]
-  void throwGrenade()
+  void throwGrenade(Vector3 forward, Vector3 position, Quaternion rotation)
   {
-    GrenadeThrowParameters state = BuildGrenadeThrowParameters();
     GameObject clone;
-    clone = Instantiate(prefab, state.position + state.forward, state.rotation) as GameObject;
-    clone.rigidbody.velocity = state.forward * magnitude;
+    clone = Instantiate(prefab, position + forward, rotation) as GameObject;
+    clone.rigidbody.velocity = forward * magnitude;
   }
 }
