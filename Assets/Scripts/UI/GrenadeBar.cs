@@ -17,6 +17,8 @@ public class GrenadeBar : MonoBehaviour {
 	public void StartGrenadeUI() {
 		active = true;
 		grenadeManager = GameObject.Find (grenadeObjectName).GetComponent<GrenadeManager>();
+		//Activate cooldown bar
+		GameObject.Find ("GrenadeBarCoolDown").GetComponent<GrenadeCooldown> ().active = true;
 	}
 	
 	// Update is called once per frame
