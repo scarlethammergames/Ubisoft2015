@@ -24,7 +24,6 @@ public class HealthBar : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (playerID>=0 && firstFill) {
-			Debug.Log("filling up hb");
 			healthbar.fillAmount = Mathf.MoveTowards (healthbar.fillAmount, 1.0f, Time.deltaTime * 0.8f);
 			if (healthbar.fillAmount == 1f) firstFill=false;
 		}
