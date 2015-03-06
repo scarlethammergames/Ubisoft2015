@@ -22,8 +22,11 @@ public class DeftPlayerController : MonoBehaviour
   public float speedWhileWalk = 2.0f;
   public float speedWhileRun = 4.0f;
   public float speedWhileSprint = 7.0f;
+
   public float jumpHeight = 5.0f;
   public float jumpCooldown = 1.0f;
+  private float jumpCooldownTemp;
+
   public float smoothingTurn = 2.0f;
   public float smoothingAim = 5.0f;
 
@@ -144,6 +147,9 @@ public class DeftPlayerController : MonoBehaviour
 
   void FixedUpdate()
   {
+    {
+      jumpCooldownTemp -= Time.deltaTime;
+    }
     if (debug)
     {
       foreach (FieldInfo info in this.gameObject.GetComponent<DeftPlayerController>().GetType().GetFields())
@@ -177,9 +183,10 @@ public class DeftPlayerController : MonoBehaviour
         }
       case PlayerState.jumping:
         {
-          if (speed_current > 0)
+          if (speed_current > 0 && jumpCooldownTemp < 0)
           {
             rigidbody.velocity += new Vector3(0, jumpHeight, 0);
+            jumpCooldownTemp = jumpCooldown;
           }
           break;
         }
