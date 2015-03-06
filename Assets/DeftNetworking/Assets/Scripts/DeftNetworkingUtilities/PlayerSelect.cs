@@ -42,6 +42,7 @@ public class PlayerSelect : MonoBehaviour
 	GameObject gm = GameObject.Find ("GameManager");
 	gm.GetComponent<TutorialManager> ().StartTutorial (selectedPlayer.name);
 	gm.GetComponent<GameManager> ().StartHealthBar (selectedPlayer.name);
+	gm.GetComponent<GameManager> ().StartGrenadeBar();
     this.enabled = false;
   }
 

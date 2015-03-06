@@ -55,6 +55,9 @@ public class GameManager : MonoBehaviour
 			hs.GetComponent<HealthStats> ().StartStats (1);
 		}
   }
+  public void StartGrenadeBar() {
+		GameObject.Find ("GrenadeBar").GetComponent<GrenadeBar>().StartGrenadeUI();
+  }
 
   public void decreaseHealth(string targetPlayerName, string attackerName)
   {
