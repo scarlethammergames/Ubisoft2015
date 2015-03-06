@@ -147,33 +147,15 @@ public class DeftPlayerController : MonoBehaviour
 
   void FixedUpdate()
   {
-    {
-      jumpCooldownTemp -= Time.deltaTime;
-    }
-    if (debug)
-    {
-      foreach (FieldInfo info in this.gameObject.GetComponent<DeftPlayerController>().GetType().GetFields())
-      {
-        if (info.Name.Contains("controller_"))
-          Debug.Log(info.Name + ": " + info.GetValue(this.gameObject.GetComponent<DeftPlayerController>()));
-      }
-      Debug.Log("CURRENT STATE: " + this.state.ToString());
-    }
-
+    jumpCooldownTemp -= Time.deltaTime;
     Animate();
-    // last jump
-
-    // get forward direction
     forward = Camera.main.transform.TransformDirection(Vector3.forward);
     forward = forward.normalized;
-
     this.move_direction = this.controllerMoveDirection.y * forward + this.controllerMoveDirection.x * new Vector3(forward.z, 0, -forward.x);
-
     if (this.move_direction.x != 0 || this.move_direction.z != 0)
     {
       last_input = move_direction;
     }
-
     switch (this.state)
     {
       case PlayerState.aiming:
@@ -208,28 +190,18 @@ public class DeftPlayerController : MonoBehaviour
     }
     if (CalculateGrounded())
     {
-      // change forward direction
       Vector3 last_input_without_y = new Vector3(last_input.x, 0, last_input.z);
       Vector3 forward_without_y = new Vector3(transform.forward.x, 0, transform.forward.z);
-
       transform.forward = Vector3.Lerp(forward_without_y, last_input_without_y, smooth * Time.deltaTime);
-
-      //this.rigidbody.AddForce(this.move_direction * speed_current);
       Vector3 move_without_y = new Vector3(this.move_direction.x, 0, this.move_direction.z);
       this.rigidbody.velocity = new Vector3(move_direction.x * speed_current, rigidbody.velocity.y, move_direction.z * speed_current);
-      // this.rigidbody.AddForce(move_without_y * this.rigidbody.mass, ForceMode.Impulse);
-
-      //// THIS IS A MASSIVE HACK VERY BAD WILL FIX SOON AFTER I GET SOME MILK!!
-      //if (this.controllerMoveDirection.x == 0 && this.controllerMoveDirection.y == 0)
-      //{
-      //  this.rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, 0);
-      //}
     }
     else
     {
       Vector3 forward_input = new Vector3(transform.forward.x, last_input.y, transform.forward.z);
       transform.forward = Vector3.Lerp(forward_input, last_input, smooth * Time.deltaTime);
     }
+
   }
 
   public void Animate()
