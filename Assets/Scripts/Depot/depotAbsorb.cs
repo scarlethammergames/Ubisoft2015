@@ -13,7 +13,7 @@ public class depotAbsorb : MonoBehaviour {
 	//Link to game manager to update stats
 	public GameObject gameManager;
 
-	private InGameStats gameStats;
+	private GameManager gameStats;
 	private bool depotFull;
 	private int capacity;
 	private int resourceVal;
@@ -25,7 +25,7 @@ public class depotAbsorb : MonoBehaviour {
 		myAnim.SetBool("isStopped", true);
 		myAnim.SetBool("isPlaying", false);
 		myAnim.speed = 0.0f;
-		gameStats = gameManager.GetComponent<InGameStats> ();
+		gameStats = gameManager.GetComponent<GameManager> ();
 		depotFull = false;
 		capacity = gameStats.depotCapacity [depotNumber];
 		resourceVal = gameStats.depotResourceValue [depotNumber];

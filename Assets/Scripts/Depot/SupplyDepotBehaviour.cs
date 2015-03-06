@@ -6,12 +6,12 @@ public class SupplyDepotBehaviour : MonoBehaviour {
 	public int maxSize=10;
 	public int currentSize=0;
 	public GameObject gameManager;
-	private InGameStats gameStats;
+	private GameManager gameStats;
 	private bool depotFull;
 	
 	// Use this for initialization
 	void Start () {
-		gameStats = gameManager.GetComponent<InGameStats> ();
+		gameStats = gameManager.GetComponent<GameManager> ();
 		depotFull = false;
 	}
 	

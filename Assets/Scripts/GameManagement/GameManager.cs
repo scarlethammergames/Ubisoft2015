@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 public enum PlayerCharacter {  Syphen, Blitz };
 
-public class InGameStats : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
   public int[] playerCurrentHealth;
   public int[] playerTotalHealth;
