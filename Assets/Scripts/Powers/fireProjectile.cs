@@ -54,100 +54,104 @@ public class fireProjectile : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    _cooldownTimer -= Time.deltaTime;
-
-    if (_parent)
+    if (this.networkView.isMine)
     {
-      this.transform.position = _parent.transform.position;
-    }
+      _cooldownTimer -= Time.deltaTime;
 
-    bool leftTriggerHeld = (GamePad.GetTrigger(GamePad.Trigger.LeftTrigger, _padIndex) > _triggerThreshold);
-    bool rightTriggerHeld = (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, _padIndex) > _triggerThreshold);
-    if (_cooldownTimer <= 0.0f)
-    {
-      //----FIRING----//
-      if ((leftTriggerHeld && _projectileButton == ProjectileTriggerButton.RIGHT)
-      || (rightTriggerHeld && _projectileButton == ProjectileTriggerButton.LEFT))
+      if (_parent)
       {
-        switch (_projectileAction)
+        this.transform.position = _parent.transform.position;
+      }
+
+      bool leftTriggerHeld = (GamePad.GetTrigger(GamePad.Trigger.LeftTrigger, _padIndex) > _triggerThreshold);
+      bool rightTriggerHeld = (GamePad.GetTrigger(GamePad.Trigger.RightTrigger, _padIndex) > _triggerThreshold);
+      if (_cooldownTimer <= 0.0f)
+      {
+        //----FIRING----//
+        if ((leftTriggerHeld && _projectileButton == ProjectileTriggerButton.RIGHT)
+        || (rightTriggerHeld && _projectileButton == ProjectileTriggerButton.LEFT))
         {
-          case ProjectileAction.THROW:
-            if (Network.isClient || Network.isServer)
-            {
-              networkView.RPC("LaunchProjectile", RPCMode.All, _offset, _magnitude, _makeChild);
-            }
-            else
-            {
-              LaunchProjectile(_offset, _magnitude, _makeChild);
-            }
-            break;
-
-          case ProjectileAction.BEAM:
-            FireBeam();
-            break;
-
-          case ProjectileAction.REMOTE_CTRL:
-            if (!_alreadyFired)
-            {
+          switch (_projectileAction)
+          {
+            case ProjectileAction.THROW:
               if (Network.isClient || Network.isServer)
               {
-                networkView.RPC("LaunchControllable", RPCMode.All);
+                networkView.RPC("LaunchProjectile", RPCMode.All, _offset, _magnitude, _makeChild);
               }
               else
               {
-                LaunchControllable();
+                LaunchProjectile(_offset, _magnitude, _makeChild);
               }
-              _alreadyFired = true;
-              _controller.enabled = false; // freeze the player
-            }
-            else
-            {
-              if (_controlledProjectile)
+              break;
+
+            case ProjectileAction.BEAM:
+              networkView.RPC("FireBeam", RPCMode.Others);
+              FireBeam();
+              break;
+
+            case ProjectileAction.REMOTE_CTRL:
+              if (!_alreadyFired)
               {
                 if (Network.isClient || Network.isServer)
                 {
-                  networkView.RPC("MoveControllable", RPCMode.All);
+                  networkView.RPC("LaunchControllable", RPCMode.All);
                 }
                 else
                 {
-                  MoveControllable();
+                  LaunchControllable();
+                }
+                _alreadyFired = true;
+                _controller.enabled = false; // freeze the player
+              }
+              else
+              {
+                if (_controlledProjectile)
+                {
+                  if (Network.isClient || Network.isServer)
+                  {
+                    networkView.RPC("MoveControllable", RPCMode.All);
+                  }
+                  else
+                  {
+                    MoveControllable();
+                  }
                 }
               }
-            }
-            break;
+              break;
 
-          default: break;
+            default: break;
+          }
+          _cooldownTimer = _cooldown;
         }
-        _cooldownTimer = _cooldown;
-      }
-      //----NOT FIRING----//
-      else
-      {
-        switch (_projectileAction)
+        //----NOT FIRING----//
+        else
         {
-          case ProjectileAction.THROW:
+          switch (_projectileAction)
+          {
+            case ProjectileAction.THROW:
 
-            break;
+              break;
 
-          case ProjectileAction.BEAM:
-            if (_alreadyFired)
-            {
-              _alreadyFired = false;
-              if (_controlledProjectile) { Destroy(_controlledProjectile); }
-            }
-            break;
+            case ProjectileAction.BEAM:
+              if (_alreadyFired)
+              {
+                _alreadyFired = false;
+                if (_controlledProjectile) { Destroy(_controlledProjectile); }
+              }
+              break;
 
-          case ProjectileAction.REMOTE_CTRL:
-            if (_alreadyFired)
-            {
-              _alreadyFired = false;
-              if (_controlledProjectile) { Destroy(_controlledProjectile); }
-              if (_controlledTarget) { Destroy(_controlledTarget); }
-              _controller.enabled = true; // unfreeze the player
-            }
-            break;
+            case ProjectileAction.REMOTE_CTRL:
+              if (_alreadyFired)
+              {
+                _alreadyFired = false;
+                if (_controlledProjectile) { Destroy(_controlledProjectile); }
+                if (_controlledTarget) { Destroy(_controlledTarget); }
+                _controller.enabled = true; // unfreeze the player
+              }
+              break;
 
-          default: break;
+            default: break;
+          }
         }
       }
     }
@@ -170,6 +174,7 @@ public class fireProjectile : MonoBehaviour
     }
   }
 
+  [RPC]
   void FireBeam()
   {
     RaycastHit hit;
@@ -179,7 +184,7 @@ public class fireProjectile : MonoBehaviour
 
     if (!_alreadyFired)
     {
-      _controlledProjectile = Instantiate(_projectile, this.transform.position, Quaternion.identity) as GameObject;
+      _controlledProjectile = Network.Instantiate(_projectile, this.transform.position, Quaternion.identity, 1) as GameObject;
       _alreadyFired = true;
     }
     _controlledProjectile.transform.position = this.transform.position + _offset;
@@ -230,7 +235,7 @@ public class fireProjectile : MonoBehaviour
     {
       distance = hit.distance;
     }
-    _controlledProjectile = Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation) as GameObject;
+    _controlledProjectile = Network.Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation, 1) as GameObject;
     _controlledTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
     _controlledTarget.transform.position = transform.position + _offset + (cameraForward * distance);
     if (_controlledTarget.collider) { _controlledTarget.collider.enabled = false; }
