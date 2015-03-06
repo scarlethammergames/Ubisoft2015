@@ -21,7 +21,8 @@ public class GrenadeManager : MonoBehaviour {
 
 
 	void Start () {
-		controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
+//		controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
+		controller = transform.parent.gameObject.GetComponent<DeftPlayerController>();
 	}
 
 	void Update () 

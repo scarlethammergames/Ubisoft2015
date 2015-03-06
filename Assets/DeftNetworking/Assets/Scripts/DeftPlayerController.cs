@@ -44,6 +44,8 @@ public class DeftPlayerController : MonoBehaviour
   public bool inverted = false;
   float invertTimer = 0;
 
+  public bool playerEnabled = true;
+
   GamePad.Index pad_index = GamePad.Index.One;
 
   float speed_current;
@@ -95,23 +97,23 @@ public class DeftPlayerController : MonoBehaviour
 
       #region PlayerState
 
-      if (this.gamepadState.LeftTrigger > 0.20f || Input.GetMouseButtonDown(1))
+      if (playerEnabled && (this.gamepadState.LeftTrigger > 0.20f || Input.GetMouseButtonDown(1)))
       {
         this.state = PlayerState.aiming;
       }
-      else if (this.gamepadState.A || Input.GetKeyDown(KeyCode.Space))
+      else if (playerEnabled && (this.gamepadState.A || Input.GetKeyDown(KeyCode.Space)))
       {
         this.state = PlayerState.jumping;
       }
-      else if (this.gamepadState.LeftStick && this.gamepadState.RightStick)
+      else if (playerEnabled && (this.gamepadState.LeftStick && this.gamepadState.RightStick))
       {
         this.state = PlayerState.sprinting;
       }
-      else if (this.gamepadState.LeftStick)
+      else if (playerEnabled && (this.gamepadState.LeftStick))
       {
         this.state = PlayerState.running;
       }
-      else if (this.gamepadState.LeftStickAxis.sqrMagnitude > 0.20f)
+      else if (playerEnabled && (this.gamepadState.LeftStickAxis.sqrMagnitude > 0.20f))
       {
         this.state = PlayerState.walking;
       }
@@ -124,7 +126,7 @@ public class DeftPlayerController : MonoBehaviour
 
       this.controllerMoveDirection = new Vector3(0, 0, 0);
       this.controllerLookDirection = new Vector3(0, 0, 0);
-      if (gamePadExists)
+      if (gamePadExists && playerEnabled)
       {
         this.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, pad_index);
         this.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, pad_index);

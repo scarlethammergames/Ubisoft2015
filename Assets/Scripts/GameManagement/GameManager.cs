@@ -44,6 +44,17 @@ public class GameManager : MonoBehaviour
     depots[0].SetActive(true);
     depotUI_objects[0].SetActive(true);
   }
+  public void StartHealthBar(string name) {
+		GameObject hb = GameObject.Find ("HealthBar");
+		GameObject hs = GameObject.Find ("HealthStats");
+		if (name.Contains ("Syphen")) {
+			hb.GetComponent<HealthBar> ().StartHealthBar (0);
+			hs.GetComponent<HealthStats> ().StartStats (0);
+		} else {
+			hb.GetComponent<HealthBar> ().StartHealthBar (1);
+			hs.GetComponent<HealthStats> ().StartStats (1);
+		}
+  }
 
   public void decreaseHealth(string targetPlayerName, string attackerName)
   {

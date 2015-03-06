@@ -22,12 +22,12 @@ public class TutorialManager : MonoBehaviour {
 		}
 		eventSystem = eventSystemObject.GetComponent<EventSystem> ();
 
-		StartTutorial ("Syphen");
+//		StartTutorial ("Syphen");
 	}
 	public void StartTutorial(string playerName) {
 		GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
 		foreach (GameObject p in players) {
-			p.GetComponent<DeftPlayerController>().enabled = false;
+			p.GetComponent<DeftPlayerController>().playerEnabled = false;
 		}
 
 		//Start first tutorial panel
@@ -61,7 +61,7 @@ public class TutorialManager : MonoBehaviour {
 	private void ExitTutorial() {
 		GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
 		foreach (GameObject p in players) {
-			p.GetComponent<DeftPlayerController>().enabled = true;
+			p.GetComponent<DeftPlayerController>().playerEnabled = true;
 		}
 	}
 }
