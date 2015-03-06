@@ -66,7 +66,6 @@ public class DeftPlayerController : MonoBehaviour
       Camera.main.GetComponent<DeftPlayerCamera>().player = this.gameObject;
       Camera.main.GetComponent<DeftPlayerCamera>().Reset();
     }
-    //this.BButton = this.gameObject.GetComponent<TestingThrusters>().Activate;
     Debug.Log("PLAYER IS AWAKE");
     this.playerHeight = this.GetComponent<CapsuleCollider>().height;
   }
@@ -133,6 +132,10 @@ public class DeftPlayerController : MonoBehaviour
       {
         this.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, pad_index);
         this.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, pad_index);
+        if (this.gamepadState.B)
+        {
+          this.GetComponent<TestingThrusters>().Activate();
+        }
       }
       else
       {
@@ -201,6 +204,7 @@ public class DeftPlayerController : MonoBehaviour
       Vector3 forward_input = new Vector3(transform.forward.x, last_input.y, transform.forward.z);
       transform.forward = Vector3.Lerp(forward_input, last_input, smooth * Time.deltaTime);
     }
+
   }
 
   public void Animate()
