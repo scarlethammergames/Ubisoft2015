@@ -54,7 +54,7 @@ public class fireProjectile : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    if (this.networkView.isMine)
+    if (this.networkView.isMine || _controller.singlePlayer)
     {
       _cooldownTimer -= Time.deltaTime;
 
@@ -84,8 +84,7 @@ public class fireProjectile : MonoBehaviour
               }
               break;
 
-            case ProjectileAction.BEAM:
-              networkView.RPC("FireBeam", RPCMode.Others);
+            case ProjectileAction.BEAM: 
               FireBeam();
               break;
 
@@ -173,8 +172,7 @@ public class fireProjectile : MonoBehaviour
       clone.transform.parent = this.transform;
     }
   }
-
-  [RPC]
+	
   void FireBeam()
   {
     RaycastHit hit;
@@ -184,7 +182,12 @@ public class fireProjectile : MonoBehaviour
 
     if (!_alreadyFired)
     {
-      _controlledProjectile = Network.Instantiate(_projectile, this.transform.position, Quaternion.identity, 1) as GameObject;
+			if(Network.isClient || Network.isServer ){
+				_controlledProjectile = Network.Instantiate(_projectile, this.transform.position, Quaternion.identity, 1) as GameObject;
+			}
+			else{
+				_controlledProjectile = Instantiate(_projectile, this.transform.position, Quaternion.identity) as GameObject;
+			}
       _alreadyFired = true;
     }
     _controlledProjectile.transform.position = this.transform.position + _offset;
