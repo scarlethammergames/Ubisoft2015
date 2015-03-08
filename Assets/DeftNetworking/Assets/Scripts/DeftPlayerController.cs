@@ -48,6 +48,8 @@ public class DeftPlayerController : MonoBehaviour
   float invertTimer = 0;
 
   public bool playerEnabled = true;
+	public bool nonlinear_camera = true;
+	public bool nonlinear_movement = true;
 
   GamePad.Index pad_index = GamePad.Index.One;
 
@@ -132,6 +134,7 @@ public class DeftPlayerController : MonoBehaviour
       {
         this.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, pad_index);
         this.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, pad_index);
+		
         if (this.gamepadState.B)
         {
           this.GetComponent<TestingThrusters>().Activate();
@@ -142,6 +145,17 @@ public class DeftPlayerController : MonoBehaviour
         this.controllerMoveDirection = new Vector2(Input.GetAxis("Horizontal"), -Input.GetAxis("Vertical"));
         this.controllerLookDirection = new Vector2(Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1), Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1));
       }
+
+		// non-linear movement
+		if(nonlinear_movement){
+			this.controllerMoveDirection.x = this.controllerMoveDirection.x*this.controllerMoveDirection.x*this.controllerMoveDirection.x;
+			this.controllerMoveDirection.y = this.controllerMoveDirection.y*this.controllerMoveDirection.y*this.controllerMoveDirection.y;
+		}
+
+		if(nonlinear_camera){
+				this.controllerLookDirection.x = this.controllerLookDirection.x*this.controllerLookDirection.x*this.controllerLookDirection.x;
+				this.controllerLookDirection.y = this.controllerLookDirection.y*this.controllerLookDirection.y*this.controllerLookDirection.y;
+		}
 
       if (inverted)
         this.controllerLookDirection.y *= -1;
