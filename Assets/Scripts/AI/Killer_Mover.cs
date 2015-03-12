@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Killer_Mover : AI_Mover {
 
+	protected StatusUpdate myStatus;
+
 
 	// Use this for initialization
 	void Start () {
@@ -10,11 +12,12 @@ public class Killer_Mover : AI_Mover {
 		//setting agent
 		this.agent = GetComponent<NavMeshAgent> ();
 
+		myStatus = GetComponentInChildren<StatusUpdate> ();
+
 		this.prevWaypoint = this.waypoint;
-		
-		gameObject.renderer.material.color = Color.green;
-		
+			
 	}
+
 	
 	// Update is called once per frame
 	void Update () 
@@ -24,23 +27,6 @@ public class Killer_Mover : AI_Mover {
 		
 	}
 
-	protected override void react()
-	{
-
-		updateWaypoint (GameObject.FindGameObjectWithTag ("Player").gameObject.transform);
-
-	}
-
-	public override void isInterested()
-	{
-		
-		this.interested = true;
-		
-		gameObject.renderer.material.color = Color.red;
-		
-		react ();
-		
-	}
 
 	protected void OnCollisionEnter(Collision other)
 	{
@@ -65,15 +51,36 @@ public class Killer_Mover : AI_Mover {
 		
 	}
 
+
+	protected override void react()
+	{
+
+		updateWaypoint (GameObject.FindGameObjectWithTag ("Player").gameObject.transform);
+
+	}
+
+
+	public override void isInterested()
+	{
+		
+		this.interested = true;
+
+		myStatus.updateText (true);
+		
+		react ();
+		
+	}
+
+
 	public void notInterested()
 	{
 		
 		this.interested = false;
+
+		myStatus.updateText (false);
 		
 		this.waypoint = this.prevWaypoint;
-		
-		gameObject.renderer.material.color = Color.green;
-		
+
 	}
 
 }

@@ -68,4 +68,5 @@ public class Sphere_Of_Influence : MonoBehaviour {
 		yield return null;
 
 	}
+
 }
