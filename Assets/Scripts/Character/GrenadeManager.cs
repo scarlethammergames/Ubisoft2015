@@ -87,7 +87,7 @@ public class GrenadeManager : MonoBehaviour
 				// not sure if call params are SUPPOSED to be different for other
 				networkView.RPC("throwGrenade", RPCMode.Others, state.forward, state.position, state.rotation);
 				// throw towards camera, stored in state
-				throwGrenade(state.forward, this.transform.position, this.transform.rotation); 
+				throwGrenade(state.forward, state.position, state.rotation); 
 				currentAmmo--; // reduce ammo
 				cooldown = triggerCooldown; // reset cooldown
 			}
