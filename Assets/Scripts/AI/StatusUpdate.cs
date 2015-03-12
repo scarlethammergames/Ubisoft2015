@@ -6,10 +6,14 @@ public class StatusUpdate : MonoBehaviour {
 	TextMesh status;
 	string normalText;
 	string chasingText;
+	Camera myCamera;
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
 	
+		myCamera = Camera.main;
+
 		status = gameObject.GetComponent<TextMesh> ();
 
 		normalText = "?!SEARCHING?!?";
@@ -17,6 +21,15 @@ public class StatusUpdate : MonoBehaviour {
 
 		updateText (false);
 
+		//transform.RotateAround(gameObject.transform.position, new Vector3(0,1,0), 180f
+
+	}
+
+	void Update()
+	{
+
+		gameObject.transform.LookAt (myCamera.transform.position);
+		gameObject.transform.RotateAround (transform.position, transform.up, 180f);
 	}
 
 	public void updateText(bool playerClose)
