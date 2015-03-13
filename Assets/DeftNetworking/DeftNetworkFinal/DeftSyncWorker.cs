@@ -29,7 +29,7 @@ public class DeftSyncWorker : MonoBehaviour
           FirstOrderSync(this.goalState);
           break;
         case SyncWorkerType.snap:
-          SnapSync(this.goalState):
+          SnapSync(this.goalState);
           break;
       }
     }
