@@ -23,7 +23,7 @@ public class TextFollow : MonoBehaviour {
 			offset = new Vector3 (0f, followObject.transform.FindChild("pCube1").transform.position.y/2f, 0f);
 		}
 		Vector3 viewport = camera.WorldToViewportPoint (followObject.transform.position + offset);
-		//If object is less than a certain distance, show its text
+		//If object is less than a certain selfDistance, show its text
 		if (viewport.z < viewDepth && viewport.x >=0 && viewport.y>=0 && viewport.z>=0 && followObject.activeSelf == true) {
 			transform.position = new Vector3 (viewport.x * Screen.width, viewport.y * Screen.height, 0f);
 			text.enabled = true;

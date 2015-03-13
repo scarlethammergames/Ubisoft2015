@@ -4,15 +4,15 @@ using System.Collections;
 public class DeftBodyStateUtil
 {
 
-    public static float Difference(DeftBodyState a, DeftBodyState b)
+    public static float SquaredPositionalDifference(DeftBodyState a, DeftBodyState b)
     {
-        return Vector3.Distance(a.position, b.position);
+        return Vector3.SqrMagnitude(a.position - b.position);
     }
 
 
-    public static float Difference(GameObject a, DeftBodyState b)
+    public static float SquaredPositionalDifference(GameObject a, DeftBodyState b)
     {
-        return Vector3.Distance(a.transform.position, b.position);
+        return Vector3.SqrMagnitude(a.transform.position - b.position);
     }
 
     public static DeftBodyState BuildState(GameObject obj)
