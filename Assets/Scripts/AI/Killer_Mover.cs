@@ -67,18 +67,6 @@ public class Killer_Mover : AI_Mover {
 	}
 
 
-	IEnumerator flashRed()
-	{
-
-		gameObject.renderer.material.color = Color.red;
-		
-		yield return new WaitForSeconds(0.2f);
-
-		gameObject.renderer.material.color = Color.black;
-
-	}
-
-
 	protected override void react()
 	{
 
@@ -106,8 +94,19 @@ public class Killer_Mover : AI_Mover {
 
 		this.myStatus.updateText (false);
 		
-		this.waypoint = this.prevWaypoint;
+		updateWaypoint(this.prevWaypoint);
 
+	}
+
+	IEnumerator flashRed()
+	{
+		
+		gameObject.renderer.material.color = Color.red;
+		
+		yield return new WaitForSeconds(0.2f);
+		
+		gameObject.renderer.material.color = Color.black;
+		
 	}
 
 }

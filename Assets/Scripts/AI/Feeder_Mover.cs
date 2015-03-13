@@ -3,16 +3,19 @@ using System.Collections;
 
 public class Feeder_Mover : AI_Mover {
 
-	Transform tempTarget;
-	bool isFeeding;
+	public float killSpeed;
 	public float timeUntilBored;
 	public float smellingRadius;
 	public float pullRadius;
 	public float pullForce;
-	private int resourcesEaten;
 	public GameObject EnviroTile;
-	private float tempSpeed;
-	protected StatusUpdate myStatus;
+
+	Transform tempTarget;
+	bool isFeeding;
+	int resourcesEaten;
+	float tempSpeed;
+	StatusUpdate myStatus;
+
 
 
 	// Use this for initialization
@@ -23,17 +26,10 @@ public class Feeder_Mover : AI_Mover {
 
 		this.myStatus = GetComponentInChildren<StatusUpdate> ();
 
-		updateSmellRange ();
+		gameObject.renderer.material.color = Color.magenta;
+
+		this.prevWaypoint = this.waypoint;
 		
-	}
-
-
-	void updateSmellRange()
-	{
-
-		SphereCollider myCollider = gameObject.GetComponentInChildren<Sphere_Of_Influence_Feeder>().gameObject.transform.GetComponent<SphereCollider>();
-		myCollider.radius = this.smellingRadius;
-
 	}
 
 
@@ -42,6 +38,13 @@ public class Feeder_Mover : AI_Mover {
 	{
 		
 		move ();
+
+		if(health <= 0)
+		{
+
+			kill ();
+
+		}
 		
 	}
 
@@ -53,27 +56,7 @@ public class Feeder_Mover : AI_Mover {
 	}
 
 
-	public override void isInterested()
-	{
-		
-		this.interested = true;
 
-		gameObject.renderer.material.color = Color.yellow;
-
-		myStatus.updateText (true);
-
-
-		//react ();
-
-	}
-
-
-	protected override void react()
-	{
-
-		this.waypoint = this.tempTarget;
-		
-	}
 	/*
 	IEnumerator falcuhnPuuull()
 	{
@@ -143,11 +126,55 @@ public class Feeder_Mover : AI_Mover {
 		
 		if(other.gameObject.tag.Equals("EnviroTile"))
 		{
-			resourcesEaten++;
 
 			Destroy (other.gameObject);
+			resourcesEaten++;
+			StartCoroutine(flashGreen());
+			StartCoroutine(falconPull());
+			return;
 
 		}
+
+		if(other.gameObject.tag.Equals("Player"))
+		{
+
+			takeDamage();
+			return;
+
+		}
+
+		if(other.gameObject.rigidbody != null && other.gameObject.rigidbody.velocity.magnitude >= killSpeed)
+		{
+
+			takeDamage ();
+
+		}
+	}
+
+	void takeDamage()
+	{
+
+		health = health - damageTaken;
+		StartCoroutine( flashRed ());
+
+	}
+
+	public override void isInterested()
+	{
+		
+		this.interested = true;
+
+		myStatus.updateText (true);
+		
+		react ();
+		
+	}
+	
+	
+	protected override void react()
+	{
+		
+		this.waypoint = this.tempTarget;
 		
 	}
 
@@ -155,16 +182,54 @@ public class Feeder_Mover : AI_Mover {
 	public void notInterested()
 	{
 
-		agent.speed = tempSpeed;
+		this.agent.speed = this.tempSpeed;
+		Debug.Log (this.agent.speed);
 
 		this.interested = false;
 
 		myStatus.updateText (false);
 
-		gameObject.renderer.material.color = Color.magenta;
+		this.waypoint = this.prevWaypoint;
 
-		SphereCollider myCollider = gameObject.GetComponentInChildren<Sphere_Of_Influence_Feeder>().gameObject.transform.GetComponent<SphereCollider>();
-		myCollider.radius = this.smellingRadius;
+	}
+
+	//change this to flashColour(Color tempColour) so you do all the colours!
+	IEnumerator flashRed()
+	{
+		
+		gameObject.renderer.material.color = Color.red;
+		
+		yield return new WaitForSeconds(0.2f);
+		
+		gameObject.renderer.material.color = Color.magenta;
+		
+	}
+
+
+	IEnumerator flashGreen()
+	{
+		
+		gameObject.renderer.material.color = Color.green;
+		
+		yield return new WaitForSeconds(0.2f);
+		
+		gameObject.renderer.material.color = Color.magenta;
+		
+	}
+
+	IEnumerator falconPull()
+	{
+		Debug.Log ("wait for it");
+		yield return new WaitForSeconds (1.3f);
+
+		this.tempSpeed = this.agent.speed;
+		this.agent.speed = 0f;
+
+		Debug.Log ("a few more seconds");
+		yield return new WaitForSeconds(1.0f);
+
+		Debug.Log ("ok go");
+		notInterested ();
 
 	}
 
