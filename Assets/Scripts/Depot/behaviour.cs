@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class behaviour : MonoBehaviour {
+public class DepotBehaviour : MonoBehaviour {
 
 	public string supplyDepotTag;
 	public string supplyItemTag;
