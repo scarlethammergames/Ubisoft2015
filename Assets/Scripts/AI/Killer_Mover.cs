@@ -3,6 +3,9 @@ using System.Collections;
 
 public class Killer_Mover : AI_Mover {
 
+	protected StatusUpdate myStatus;
+
+	public float killSpeed;
 
 	// Use this for initialization
 	void Start () {
@@ -10,19 +13,59 @@ public class Killer_Mover : AI_Mover {
 		//setting agent
 		this.agent = GetComponent<NavMeshAgent> ();
 
+		myStatus = GetComponentInChildren<StatusUpdate> ();
+
 		this.prevWaypoint = this.waypoint;
-		
-		gameObject.renderer.material.color = Color.green;
-		
+
+		gameObject.renderer.material.color = Color.black;
+			
 	}
+
 	
 	// Update is called once per frame
 	void Update () 
 	{
 
 		move ();
+
+
+		if(this.health <= 0)
+		{
+
+			Destroy (this.gameObject);
+
+		}
+
+	}
+
+
+	protected void OnCollisionEnter(Collision other)
+	{
+
+		if(other.rigidbody == null)
+		{
+
+			return;
+
+		}
+
+		if (other.rigidbody.velocity.magnitude >= killSpeed)
+		{
+			if(other.gameObject.tag.Equals("Player"))
+			{
+
+				myStatus.updateText(true);
+
+			}
+
+			health = health - damageTaken;
+
+			StartCoroutine(flashRed ());
+
+		}
 		
 	}
+
 
 	protected override void react()
 	{
@@ -31,48 +74,38 @@ public class Killer_Mover : AI_Mover {
 
 	}
 
+
 	public override void isInterested()
 	{
 		
 		this.interested = true;
-		
-		gameObject.renderer.material.color = Color.red;
+
+		this.myStatus.updateText (true);
 		
 		react ();
 		
 	}
 
-	protected void OnCollisionEnter(Collision other)
-	{
-		
-		if (other.gameObject.tag.Equals ("projectile") || other.gameObject.tag.Equals ("Projectile"))
-		{
-			
-			Destroy (other.gameObject);
-			
-			if(this.Health <= 0)
-			{
-				
-				Destroy (gameObject);
-				
-				return;
-				
-			}	
-			
-			this.Health -= damageTaken;
-			
-		}
-		
-	}
 
 	public void notInterested()
 	{
 		
 		this.interested = false;
+
+		this.myStatus.updateText (false);
 		
-		this.waypoint = this.prevWaypoint;
+		updateWaypoint(this.prevWaypoint);
+
+	}
+
+	IEnumerator flashRed()
+	{
 		
-		gameObject.renderer.material.color = Color.green;
+		gameObject.renderer.material.color = Color.red;
+		
+		yield return new WaitForSeconds(0.2f);
+		
+		gameObject.renderer.material.color = Color.black;
 		
 	}
 

@@ -29,6 +29,8 @@ public class GrenadeManager : MonoBehaviour
   private float cooldown = 0; // temp var for cooldown after trigger
   private DeftPlayerController controller;
 
+	private bool goingToFire = false;
+
   public static byte[] MarshallGrenadeThrowParameters(GrenadeThrowParameters state)
   {
     int size = Marshal.SizeOf(state);
@@ -63,7 +65,7 @@ public class GrenadeManager : MonoBehaviour
 
   void Start()
   {
-    //		controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
+    // controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
     controller = transform.parent.gameObject.GetComponent<DeftPlayerController>();
   }
 
@@ -71,22 +73,25 @@ public class GrenadeManager : MonoBehaviour
   {
     if (networkView.isMine)
     {
-      trigger = controller.gamepadState.RightShoulder || (controller.gamepadState.RightTrigger > 0.20f);
-      cooldown -= Time.deltaTime;
+      trigger = controller.gamepadState.RightShoulder || (controller.gamepadState.RightTrigger > 0.20f); 
+      cooldown -= Time.deltaTime; // reduce cooldown timer
 
-      if (trigger && cooldown <= 0.0)
-      {
-        trigger = false;
-        cooldown = triggerCooldown;
-        if (currentAmmo > 0)
-        {
-          //byte[] state = MarshallGrenadeThrowParameters(BuildGrenadeThrowParameters());
-          GrenadeThrowParameters state = BuildGrenadeThrowParameters();
-          networkView.RPC("throwGrenade", RPCMode.Others, state.forward, state.position, state.rotation);
-          throwGrenade(this.transform.forward, this.transform.position, this.transform.rotation);
-          currentAmmo--;
-        }
-      }
+		if (trigger){
+			controller.state = PlayerState.aiming; //let blitz aim (even if no ammo)
+			goingToFire = true; // bool to indicate intent to fire
+		} else if (!trigger){
+			controller.state = PlayerState.idle; // on trigger release, revert to idle
+			if (cooldown <= 0.0 && currentAmmo > 0 && goingToFire) // conditions for firing
+			{   // get throw params and do network-y stuff by Calem
+				GrenadeThrowParameters state = BuildGrenadeThrowParameters();
+				networkView.RPC("throwGrenade", RPCMode.Others, state.forward, state.position, state.rotation);
+				// throw towards camera, stored in state
+				throwGrenade(state.forward, state.position, state.rotation); 
+				currentAmmo--; // reduce ammo
+				cooldown = triggerCooldown; // reset cooldown
+			}
+			goingToFire = false; // always remove intent to fire after releasing trigger
+		}
     }
   }
 

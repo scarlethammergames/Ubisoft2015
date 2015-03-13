@@ -8,8 +8,9 @@ public class AI_Mover : MonoBehaviour {
 	public Transform waypoint;
 	protected bool interested;
 	protected Transform prevWaypoint;
-	public int Health;
+	public int health;
 	public int damageTaken;
+
 
 	public bool interest()
 	{
@@ -19,8 +20,10 @@ public class AI_Mover : MonoBehaviour {
 	}
 
 
-	public virtual void isInterested()
-	{	}
+	public virtual void isInterested() {}
+
+	protected virtual void react() {}
+
 
 	public Transform getPosition()
 	{
@@ -28,6 +31,7 @@ public class AI_Mover : MonoBehaviour {
 		return this.transform;
 		
 	}
+
 
 	public void updateWaypoint(Transform nextWaypoint)
 	{
@@ -49,19 +53,8 @@ public class AI_Mover : MonoBehaviour {
 
 		}
 
-		this.agent.SetDestination (this.waypoint.position);
+		this.agent.SetDestination (Vector3.Lerp (transform.position, this.waypoint.position, 0.5f));
 	
 	}
-
-	protected virtual void react()
-	{
-	//	Debug.Log ("reacting");
-	//	updateWaypoint (GameObject.FindGameObjectWithTag ("Player").gameObject.transform);
-		
-	}
-
-
-
-	
 
 }

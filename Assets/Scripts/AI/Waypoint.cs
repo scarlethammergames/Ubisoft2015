@@ -11,12 +11,14 @@ public class Waypoint : MonoBehaviour {
 
 		if(other.tag.Equals ("Killer") )
 		{
+
 			if( !other.gameObject.GetComponent<Killer_Mover>().interest() )
 			{
 
 				other.gameObject.GetComponent<Killer_Mover>().updateWaypoint(this.nextWaypoint);
 			
 			}
+
 		}
 
 	}
