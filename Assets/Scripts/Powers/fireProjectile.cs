@@ -238,8 +238,13 @@ public class fireProjectile : MonoBehaviour
     {
       distance = hit.distance;
     }
-    _controlledProjectile = Network.Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation, 1) as GameObject;
-    _controlledTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		if(Network.isClient || Network.isServer){
+			_controlledProjectile = Network.Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation, 1) as GameObject;
+		}
+		else{
+			_controlledProjectile = Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation) as GameObject;
+		}
+	_controlledTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
     _controlledTarget.transform.position = transform.position + _offset + (cameraForward * distance);
     if (_controlledTarget.collider) { _controlledTarget.collider.enabled = false; }
     _controlledTarget.renderer.enabled = false;
