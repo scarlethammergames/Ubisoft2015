@@ -12,14 +12,16 @@ public class Feeder_Mover : AI_Mover {
 	private int resourcesEaten;
 	public GameObject EnviroTile;
 	private float tempSpeed;
+	protected StatusUpdate myStatus;
+
 
 	// Use this for initialization
 	void Start ()
 	{
 		//setting agent
 		this.agent = GetComponent<NavMeshAgent> ();
-		
-		gameObject.renderer.material.color = Color.magenta;
+
+		this.myStatus = GetComponentInChildren<StatusUpdate> ();
 
 		updateSmellRange ();
 		
@@ -43,32 +45,6 @@ public class Feeder_Mover : AI_Mover {
 		
 	}
 
-	void FixedUpdate()
-	{
-		if(interested){
-		
-			tempSpeed = agent.speed;
-			agent.speed = 0.0f;
-			
-			foreach(Collider collider in Physics.OverlapSphere(gameObject.transform.position, pullRadius))
-			{
-				if(collider.gameObject.tag.Equals("EnviroTile"))
-				{
-					Debug.Log ("NOMNOM PULL");
-					
-					Vector3 directedForce = transform.position - collider.transform.position;
-					
-					collider.rigidbody.AddForce (directedForce.normalized * pullForce * Time.deltaTime);
-				}
-			
-			}
-		
-			notInterested ();
-		}
-
-	}
-
-
 	public void setTempTarget(Transform nextWaypoint)
 	{
 
@@ -83,6 +59,9 @@ public class Feeder_Mover : AI_Mover {
 		this.interested = true;
 
 		gameObject.renderer.material.color = Color.yellow;
+
+		myStatus.updateText (true);
+
 
 		//react ();
 
@@ -117,12 +96,34 @@ public class Feeder_Mover : AI_Mover {
 		yield return new WaitForSeconds (4.0f);
 		notInterested ();
 
+			void FixedUpdate()
+	{
+		if(interested){
+		
+			tempSpeed = agent.speed;
+			agent.speed = 0.0f;
+			
+			foreach(Collider collider in Physics.OverlapSphere(gameObject.transform.position, pullRadius))
+			{
+				if(collider.gameObject.tag.Equals("EnviroTile"))
+				{
+
+					Vector3 directedForce = transform.position - collider.transform.position;
+					
+					collider.rigidbody.AddForce (directedForce.normalized * pullForce * Time.deltaTime);
+				}
+			
+			}
+		
+			notInterested ();
+		}
+
+	}
 
 	}*/
 
 	public void kill()
 	{
-		//update text?
 
 		int i = 0;
 		GameObject tempGameObj;
@@ -140,37 +141,11 @@ public class Feeder_Mover : AI_Mover {
 	protected void OnCollisionEnter(Collision other)
 	{
 		
-		if (other.gameObject.tag.Equals ("projectile") || other.gameObject.tag.Equals ("Projectile"))
-		{
-			
-			Destroy (other.gameObject);
-
-			if(this.Health <= 0)
-			{
-				
-				Destroy (gameObject);
-				
-				return;
-				
-			}	
-			
-			this.Health = this.Health - damageTaken;
-			
-		}
-		else if(other.gameObject.tag.Equals("EnviroTile"))
+		if(other.gameObject.tag.Equals("EnviroTile"))
 		{
 			resourcesEaten++;
 
 			Destroy (other.gameObject);
-			/*DEPRECATED
-			//OMNOMNOMTEXT
-			Debug.Log ("NOM");
-			gameObject.renderer.material.color = Color.yellow;
-
-			//StartCoroutine(noMoreFood());
-
-			other.gameObject.Destroy();
-			*/
 
 		}
 		
@@ -184,7 +159,7 @@ public class Feeder_Mover : AI_Mover {
 
 		this.interested = false;
 
-		//updateWaypoint (this.prevWaypoint);
+		myStatus.updateText (false);
 
 		gameObject.renderer.material.color = Color.magenta;
 

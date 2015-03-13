@@ -4,9 +4,11 @@ using System.Collections;
 public class StatusUpdate : MonoBehaviour {
 
 	TextMesh status;
-	string normalText;
-	string chasingText;
 	Camera myCamera;
+
+	public string normalText;
+	public string chasingText;
+
 
 	// Use this for initialization
 	void Start ()
@@ -16,12 +18,7 @@ public class StatusUpdate : MonoBehaviour {
 
 		status = gameObject.GetComponent<TextMesh> ();
 
-		normalText = "?!SEARCHING?!?";
-		chasingText = "!?GOTCHA?!";
-
 		updateText (false);
-
-		//transform.RotateAround(gameObject.transform.position, new Vector3(0,1,0), 180f
 
 	}
 
@@ -30,6 +27,7 @@ public class StatusUpdate : MonoBehaviour {
 
 		gameObject.transform.LookAt (myCamera.transform.position);
 		gameObject.transform.RotateAround (transform.position, transform.up, 180f);
+
 	}
 
 	public void updateText(bool playerClose)
@@ -40,12 +38,15 @@ public class StatusUpdate : MonoBehaviour {
 			status.color = Color.red;
 			status.text = chasingText;
 		
-		}else{
+		}
+		else
+		{
 
 			status.color = Color.yellow;
 			status.text = normalText;
 
 		}
+
 	}
 
 }

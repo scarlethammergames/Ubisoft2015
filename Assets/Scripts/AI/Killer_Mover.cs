@@ -5,6 +5,7 @@ public class Killer_Mover : AI_Mover {
 
 	protected StatusUpdate myStatus;
 
+	public float killSpeed;
 
 	// Use this for initialization
 	void Start () {
@@ -15,6 +16,8 @@ public class Killer_Mover : AI_Mover {
 		myStatus = GetComponentInChildren<StatusUpdate> ();
 
 		this.prevWaypoint = this.waypoint;
+
+		gameObject.renderer.material.color = Color.black;
 			
 	}
 
@@ -24,31 +27,55 @@ public class Killer_Mover : AI_Mover {
 	{
 
 		move ();
-		
+
+
+		if(this.health <= 0)
+		{
+
+			Destroy (this.gameObject);
+
+		}
+
 	}
 
 
 	protected void OnCollisionEnter(Collision other)
 	{
-		
-		if (other.gameObject.tag.Equals ("projectile") || other.gameObject.tag.Equals ("Projectile"))
+
+		if(other.rigidbody == null)
 		{
-			
-			Destroy (other.gameObject);
-			
-			if(this.Health <= 0)
+
+			return;
+
+		}
+
+		if (other.rigidbody.velocity.magnitude >= killSpeed)
+		{
+			if(other.gameObject.tag.Equals("Player"))
 			{
-				
-				Destroy (gameObject);
-				
-				return;
-				
-			}	
-			
-			this.Health -= damageTaken;
-			
+
+				myStatus.updateText(true);
+
+			}
+
+			health = health - damageTaken;
+
+			StartCoroutine(flashRed ());
+
 		}
 		
+	}
+
+
+	IEnumerator flashRed()
+	{
+
+		gameObject.renderer.material.color = Color.red;
+		
+		yield return new WaitForSeconds(0.2f);
+
+		gameObject.renderer.material.color = Color.black;
+
 	}
 
 
@@ -65,7 +92,7 @@ public class Killer_Mover : AI_Mover {
 		
 		this.interested = true;
 
-		myStatus.updateText (true);
+		this.myStatus.updateText (true);
 		
 		react ();
 		
@@ -77,7 +104,7 @@ public class Killer_Mover : AI_Mover {
 		
 		this.interested = false;
 
-		myStatus.updateText (false);
+		this.myStatus.updateText (false);
 		
 		this.waypoint = this.prevWaypoint;
 

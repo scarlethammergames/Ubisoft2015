@@ -18,7 +18,6 @@ public class Killer_Spawner : MonoBehaviour {
 	
 	void spawn()
 	{
-		
 		int i = 0;
 		GameObject tempObj;
 		
@@ -34,7 +33,7 @@ public class Killer_Spawner : MonoBehaviour {
 	}
 	
 	
-	IEnumerator spawnStarter(float timeToWait)
+	public IEnumerator spawnStarter(float timeToWait)
 	{
 		
 		yield return new WaitForSeconds (timeToWait);

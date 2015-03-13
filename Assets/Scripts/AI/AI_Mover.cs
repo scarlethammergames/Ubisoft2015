@@ -8,7 +8,7 @@ public class AI_Mover : MonoBehaviour {
 	public Transform waypoint;
 	protected bool interested;
 	protected Transform prevWaypoint;
-	public int Health;
+	public int health;
 	public int damageTaken;
 
 
