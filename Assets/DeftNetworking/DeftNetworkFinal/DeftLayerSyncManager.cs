@@ -4,21 +4,12 @@ using System.Collections.Generic;
 using System;
 using System.Runtime.InteropServices;
 
-public struct DeftBodyState
-{
-  public double timestamp;
-  public NetworkViewID id;
-  public Vector3 position;
-  public Vector3 velocity;
-  public Quaternion rotation;
-  public Vector3 angularVelocity;
-}
-
 public class DeftLayerSyncManager : MonoBehaviour
 {
 
   public Dictionary<NetworkViewID, GameObject> objectsInLayer;
   public Queue<DeftBodyState> syncQueue;
+  public List<DeftBodyState> lastSavedStates;
   public int layer;
   public float hardSyncThreshold = 5.0f;
   public float maxSyncRate = 0.1f;
@@ -35,26 +26,23 @@ public class DeftLayerSyncManager : MonoBehaviour
 
   GameObject[] players;
 
-  public static byte[] MarshallDeftBodyState(DeftBodyState state)
+  [RPC]
+  public void SetLastSavedState()
   {
-    int size = Marshal.SizeOf(state);
-    byte[] arr = new byte[size];
-    IntPtr ptr = Marshal.AllocHGlobal(size);
-    Marshal.StructureToPtr(state, ptr, true);
-    Marshal.Copy(ptr, arr, 0, size);
-    Marshal.FreeHGlobal(ptr);
-    return arr;
+    this.lastSavedStates.Clear();
+    foreach (KeyValuePair<NetworkViewID, GameObject> entry in this.objectsInLayer)
+    {
+      this.lastSavedStates.Add(DeftBodyStateUtil.BuildState(entry.Value));
+    }
   }
 
-  public static DeftBodyState UnMarshalDeftBodyState(byte[] arr)
+  [RPC]
+  public void LoadLastSavedState()
   {
-    DeftBodyState state = new DeftBodyState();
-    int size = Marshal.SizeOf(state);
-    IntPtr ptr = Marshal.AllocHGlobal(size);
-    Marshal.Copy(arr, 0, ptr, size);
-    state = (DeftBodyState)Marshal.PtrToStructure(ptr, state.GetType());
-    Marshal.FreeHGlobal(ptr);
-    return state;
+    foreach (DeftBodyState state in this.lastSavedStates)
+    {
+      UpdateDeftBodyState(state);
+    }
   }
 
   [RPC]
@@ -68,6 +56,7 @@ public class DeftLayerSyncManager : MonoBehaviour
         this.objectsInLayer[obj.networkView.viewID] = obj;
       }
     }
+    this.players = GameObject.FindGameObjectsWithTag("Player");
     if (debug)
     {
       Debug.Log(this.objectsInLayer.Count + " objects tracked in layer " + this.layer + "  with " + this.players.Length + " players observed.");
@@ -75,9 +64,18 @@ public class DeftLayerSyncManager : MonoBehaviour
   }
 
   [RPC]
-  public void UpdateDeftBodyState(byte[] bytes)
+  public void UpdateMarshalledDeftBodyState(byte[] bytes)
   {
-    DeftBodyState state = UnMarshalDeftBodyState(bytes);
+    DeftBodyState state = DeftBodyStateUtil.UnMarshalDeftBodyState(bytes);
+    Debug.Log("Updating deft body state for " + state.id.ToString());
+    this.objectsInLayer[state.id].GetComponent<DeftSyncWorker>().goalState = state;
+    this.objectsInLayer[state.id].GetComponent<DeftSyncWorker>().StartSync();
+  }
+
+
+  [RPC]
+  public void UpdateDeftBodyState(DeftBodyState state)
+  {
     Debug.Log("Updating deft body state for " + state.id.ToString());
     this.objectsInLayer[state.id].GetComponent<DeftSyncWorker>().goalState = state;
     this.objectsInLayer[state.id].GetComponent<DeftSyncWorker>().StartSync();
@@ -164,6 +162,7 @@ public class DeftLayerSyncManager : MonoBehaviour
     }
     this.objectsInLayer = new Dictionary<NetworkViewID, GameObject>();
     this.syncQueue = new Queue<DeftBodyState>();
+    this.lastSavedStates = new List<DeftBodyState>();
     this.SetObjectsInLayer();
   }
 
@@ -185,7 +184,7 @@ public class DeftLayerSyncManager : MonoBehaviour
           {
             Debug.Log(Time.time + ": Sending " + state.id.ToString());
           }
-          //this.networkView.RPC("UpdateDeftBodyState", RPCMode.AllBuffered, MarshallDeftBodyState(state));
+          //this.networkView.RPC("UpdateDeftBodyState", RPCMode.AllBuffered, DeftBodyStateUtil.MarshallDeftBodyState(state));
           this.networkView.RPC("UpdateDeftBodyStateRaw", RPCMode.AllBuffered, state.position, state.rotation, state.timestamp, state.velocity, state.angularVelocity, state.id);
           this.maxSyncRateTmp = 0.0f;
         }
