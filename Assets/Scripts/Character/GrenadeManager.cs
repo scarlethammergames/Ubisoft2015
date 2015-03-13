@@ -84,7 +84,6 @@ public class GrenadeManager : MonoBehaviour
 			if (cooldown <= 0.0 && currentAmmo > 0 && goingToFire) // conditions for firing
 			{   // get throw params and do network-y stuff by Calem
 				GrenadeThrowParameters state = BuildGrenadeThrowParameters();
-				// not sure if call params are SUPPOSED to be different for other
 				networkView.RPC("throwGrenade", RPCMode.Others, state.forward, state.position, state.rotation);
 				// throw towards camera, stored in state
 				throwGrenade(state.forward, state.position, state.rotation); 
