@@ -28,6 +28,9 @@ public class DeftSyncWorker : MonoBehaviour
         case SyncWorkerType.firstorder:
           FirstOrderSync(this.goalState);
           break;
+        case SyncWorkerType.snap:
+          SnapSync(this.goalState):
+          break;
       }
     }
   }
@@ -52,6 +55,10 @@ public class DeftSyncWorker : MonoBehaviour
     this.gameObject.GetComponent<Rigidbody>().rotation = state.rotation;
     this.gameObject.GetComponent<Rigidbody>().angularVelocity = state.angularVelocity;
     this.durationTmp = 0.0f;
+    if (debug)
+    {
+      Debug.Log(durationTmp + ": moving " + state.id + " to " + state.position.ToString());
+    }
   }
 
   void SecondOrderSync(BodyState[] states)
