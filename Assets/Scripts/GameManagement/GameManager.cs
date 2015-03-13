@@ -87,9 +87,11 @@ public class GameManager : MonoBehaviour
   //Increases resource count of a certain depot
   public void increaseResourceCount(int depotNumber)
   {
-    depotCurrentStock[depotNumber] += depotResourceValue[depotNumber];
-	if (depotCurrentStock [depotNumber] >= depotCapacity[depotNumber]) {
-		depotFull ();
+		if (depotCurrentStock[depotNumber] < depotCapacity[depotNumber]) {
+		depotCurrentStock[depotNumber] += depotResourceValue[depotNumber];
+		if (depotCurrentStock [depotNumber] >= depotCapacity[depotNumber]) {
+			depotFull ();
+		}
 	}
   }
   public void depotFull()

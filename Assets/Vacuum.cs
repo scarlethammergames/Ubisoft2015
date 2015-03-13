@@ -58,7 +58,7 @@ public class Vacuum : MonoBehaviour
   void OnTriggerStay(Collider other)
   {
     if (active)
-      if (other.rigidbody.useGravity && other.tag != "Player")
+      if (other.rigidbody!=null && other.rigidbody.useGravity && other.tag != "Player")
       {
         PhysicsStatus status = other.gameObject.GetComponent<PhysicsStatus>();
         Vector3 direction = Vector3.Normalize(other.transform.position - this.transform.parent.position);
