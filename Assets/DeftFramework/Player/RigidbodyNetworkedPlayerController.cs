@@ -99,13 +99,16 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   float syncTime;
 
   [RPC]
-  public void UpdatePlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity)
+  public void UpdatePlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity, float health, NetworkViewID id)
   {
-    Debug.Log("Updating player state for " + id.ToString());
-    this.GetComponent<Rigidbody>().position = position;
-    this.GetComponent<Rigidbody>().rotation = rotation;
-    this.GetComponent<Rigidbody>().velocity = velocity;
-    this.GetComponent<Rigidbody>().angularVelocity = angularVelocity;
+    if (this.networkView.viewID == id)
+    {
+      this.GetComponent<Rigidbody>().position = position;
+      this.GetComponent<Rigidbody>().rotation = rotation;
+      this.GetComponent<Rigidbody>().velocity = velocity;
+      this.GetComponent<Rigidbody>().angularVelocity = angularVelocity;
+      this.GetComponent<PlayerFields>().health = health;
+    }
   }
   #endregion
 
@@ -338,10 +341,11 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     #endregion
 
     #region NetworkUpdate
-    if(this.isThisMachinesPlayer)
+    if (this.isThisMachinesPlayer)
     {
       Rigidbody rigidbody = this.GetComponent<Rigidbody>();
-      this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity);
+      PlayerFields fields = this.GetComponent<PlayerFields>()
+      this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
     }
     #endregion
   }

@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerFields : MonoBehaviour
 {
 
   public float health = 100.0f;
-  public float damageMultiplier = 1.0f;
   public bool debug = true;
-
 
 
   void OnCollisionEnter(Collision collision)
