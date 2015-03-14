@@ -3,7 +3,7 @@ using System.Collections;
 using GamepadInput;
 
 public enum PlayerControllerState { WALKING, RUNNING, AIMING };
-public enum MovementType { IMPULSE, SETVELOCITY, FORCE, THRUSTERS };
+public enum MovementType { IMPULSE, SIMPLEWALK, SETVELOCITY, FORCE, THRUSTERS };
 
 public class RigidbodyNetworkedPlayerController : MonoBehaviour
 {
@@ -322,11 +322,20 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     {
       switch (this.movementType)
       {
-        case MovementType.SETVELOCITY:
+        case MovementType.SIMPLEWALK:
           if (this.controllerMoveDirection.sqrMagnitude > 1.0f)
           {
-            this.GetComponent<Rigidbody>().velocity = Vector3.Lerp(this.GetComponent<Rigidbody>().velocity, this.moveDirection * this.GetComponent<Rigidbody>().mass, 0.1f * this.velocityDampingSpeed * Time.deltaTime);
-            this.transform.forward = Vector3.Lerp(this.transform.forward, new Vector3(this.controllerMoveDirection.x, 0.0f, this.controllerMoveDirection.y), this.velocityDampingSpeed * Time.deltaTime);
+            this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed;
+            this.transform.forward = new Vector3(this.controllerMoveDirection.x, 0.0f, this.controllerMoveDirection.y);
+            this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, 1.0f * Time.deltaTime);
+            if (this.playerState == PlayerControllerState.RUNNING)
+            {
+              this.GetComponent<Rigidbody>().velocity *= this.runSpeedMultiplier;
+            }
+            else if (this.playerState == PlayerControllerState.AIMING)
+            {
+              this.GetComponent<Rigidbody>().velocity *= this.aimSpeedMultiplier;
+            }
           }
           break;
         case MovementType.IMPULSE:
