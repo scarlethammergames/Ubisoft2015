@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum GravityNodeType { Push, Pull, Lift }
+public enum ForceNodeType { Push, Pull, Lift }
 public enum DistanceRelationship { None, Linear }
 public enum NodeColliderType { Radial, Box, Custom };
 
@@ -14,7 +14,7 @@ public class ForceNodeBehaviour : MonoBehaviour
   public float radiusBirth;
   public float radiusDeath;
   public float radiusRatio;
-  public GravityNodeType gravityType;
+  public ForceNodeType gravityType;
   public NodeColliderType colliderType;
   public DistanceRelationship distanceType;
 
@@ -65,7 +65,7 @@ public class ForceNodeBehaviour : MonoBehaviour
       Vector3 direction = Vector3.Normalize(other.transform.position - this.transform.position);
       switch (gravityType)
       {
-        case GravityNodeType.Lift:
+        case ForceNodeType.Lift:
           if (status == null || status.liftable || affectEverything)
           {
             switch (distanceType)
@@ -79,7 +79,7 @@ public class ForceNodeBehaviour : MonoBehaviour
             }
           }
           break;
-        case GravityNodeType.Pull:
+        case ForceNodeType.Pull:
           if (status == null || status.pullable || affectEverything)
           {
             switch (distanceType)
@@ -93,7 +93,7 @@ public class ForceNodeBehaviour : MonoBehaviour
             }
           }
           break;
-        case GravityNodeType.Push:
+        case ForceNodeType.Push:
           if (status == null || status.pushable || affectEverything)
           {
             switch (distanceType)
