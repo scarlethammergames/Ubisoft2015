@@ -344,7 +344,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     if (this.isThisMachinesPlayer)
     {
       Rigidbody rigidbody = this.GetComponent<Rigidbody>();
-      PlayerFields fields = this.GetComponent<PlayerFields>()
+      PlayerFields fields = this.GetComponent<PlayerFields>();
       this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
     }
     #endregion
