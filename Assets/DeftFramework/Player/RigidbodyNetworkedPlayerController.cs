@@ -22,6 +22,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   public float jumpHeight = 2.0f;
   public float jumpCooldown;
   float jumpCooldownTmp;
+  public bool grounded;
 
   public float relCameraPosMag = 1.5f;
   public Vector3 pivotOffset = new Vector3(1.0f, 0.0f, -1.0f);
@@ -318,13 +319,15 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     #endregion
 
     #region Movement
+    this.grounded = this.isGrounded();
     if (this.moveDirection.magnitude > 0.05f)
     {
       switch (this.movementType)
       {
         case MovementType.SIMPLEWALK:
           this.moveDirection.y = 0f;
-          this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed * this.GetComponent<Rigidbody>().mass + new Vector3(0f, this.GetComponent<Rigidbody>().velocity.y, 0f);
+          float yVelocityTmp = this.GetComponent<Rigidbody>().velocity.y;
+          this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed * this.GetComponent<Rigidbody>().mass;
           this.transform.forward = this.moveDirection.normalized;
           this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, 1.0f * Time.deltaTime);
           if (this.playerState == PlayerControllerState.RUNNING)
@@ -334,6 +337,14 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
           else if (this.playerState == PlayerControllerState.AIMING)
           {
             this.GetComponent<Rigidbody>().velocity *= this.aimSpeedMultiplier;
+          }
+          if (grounded)
+          {
+
+          }
+          else
+          {
+            this.GetComponent<Rigidbody>().velocity += Physics.gravity;
           }
           break;
         case MovementType.IMPULSE:
@@ -368,6 +379,6 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
   public bool isGrounded()
   {
-    return Physics.Raycast(this.transform.position, Vector3.down, (this.GetComponent<CapsuleCollider>().height / 2.0f) + 0.1f);
+    return Physics.Raycast(this.transform.position, Vector3.down, (this.GetComponent<CapsuleCollider>().height / 2.0f) + 0.2f);
   }
 }
