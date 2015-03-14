@@ -36,7 +36,7 @@ public class Crosshair : MonoBehaviour {
 	
 	void Update()
 	{
-		//Used just for test (weapon script should change spread).
+		//Used just for test (weapon script should change crosshairSpread).
 		if(Input.GetKey(KeyCode.K)) spread += spreadPerSecond * Time.deltaTime;
 		else spread -= spreadPerSecond * 2 * Time.deltaTime;   
 		
