@@ -285,9 +285,9 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     {
       this.playerState = PlayerControllerState.WALKING;
     }
-    Vector3 forward = this.myCamera.transform.TransformDirection(Vector3.forward);
+    Vector3 forward = this.myCamera.transform.TransformDirection(this.transform.forward);
     forward = forward.normalized;
-    this.moveDirection = this.controllerMoveDirection.y * forward + this.controllerMoveDirection.x * new Vector3(forward.z, 0, -forward.x);
+    this.moveDirection = this.controllerMoveDirection.y * forward + this.controllerMoveDirection.x * forward;
     #endregion
 
     #region RunningActionByState
@@ -323,19 +323,17 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       switch (this.movementType)
       {
         case MovementType.SIMPLEWALK:
-          if (this.controllerMoveDirection.sqrMagnitude > 1.0f)
+          this.moveDirection.y = 0f;
+          this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed * this.GetComponent<Rigidbody>().mass + new Vector3(0f, this.GetComponent<Rigidbody>().velocity.y, 0f);
+          this.transform.forward = this.moveDirection.normalized;
+          this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, 1.0f * Time.deltaTime);
+          if (this.playerState == PlayerControllerState.RUNNING)
           {
-            this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed;
-            this.transform.forward = new Vector3(this.controllerMoveDirection.x, 0.0f, this.controllerMoveDirection.y);
-            this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, 1.0f * Time.deltaTime);
-            if (this.playerState == PlayerControllerState.RUNNING)
-            {
-              this.GetComponent<Rigidbody>().velocity *= this.runSpeedMultiplier;
-            }
-            else if (this.playerState == PlayerControllerState.AIMING)
-            {
-              this.GetComponent<Rigidbody>().velocity *= this.aimSpeedMultiplier;
-            }
+            this.GetComponent<Rigidbody>().velocity *= this.runSpeedMultiplier;
+          }
+          else if (this.playerState == PlayerControllerState.AIMING)
+          {
+            this.GetComponent<Rigidbody>().velocity *= this.aimSpeedMultiplier;
           }
           break;
         case MovementType.IMPULSE:
