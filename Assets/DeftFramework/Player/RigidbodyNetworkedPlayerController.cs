@@ -10,6 +10,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
   public PlayerControllerState playerState;
   public MovementType movementType;
+  public string name;
 
   public float baseSpeed = 2.0f;
   public float runSpeedMultiplier = 1.5f;
@@ -116,6 +117,10 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
   public void UpdateFullPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity, float health, NetworkViewID id)
   {
+    if (debug)
+    {
+      Debug.Log("Performing full update on " + this.name);
+    }
     if (this.networkView.viewID == id)
     {
       this.GetComponent<Rigidbody>().position = position;
@@ -129,6 +134,10 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   [RPC]
   public void UpdatePartialPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, NetworkViewID id)
   {
+    if (debug)
+    {
+      Debug.Log("Performing partial update on " + this.name);
+    }
     if (this.networkView.viewID == id)
     {
       this.GetComponent<Rigidbody>().position = position;
@@ -206,6 +215,37 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
     this.myCamera.transform.position = this.transform.position + camYRotation * smoothPivotOffset + aimRotation * smoothCamOffset;
   }
+
+  bool DoubleViewingPosCheck(Vector3 checkPos)
+  {
+    return ViewingPosCheck(checkPos) && ReverseViewingPosCheck(checkPos);
+  }
+
+  bool ViewingPosCheck(Vector3 checkPos)
+  {
+    RaycastHit hit;
+    if (Physics.Raycast(checkPos, this.transform.position - checkPos, out hit, relCameraPosMag))
+    {
+      if (hit.transform != this && !hit.transform.GetComponent<Collider>().isTrigger)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool ReverseViewingPosCheck(Vector3 checkPos)
+  {
+    RaycastHit hit;
+    if (Physics.Raycast(this.transform.position, checkPos - this.transform.position, out hit, relCameraPosMag))
+    {
+      if (hit.transform != transform && !hit.transform.GetComponent<Collider>().isTrigger)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
   #endregion
 
 
@@ -241,36 +281,6 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   }
   #endregion
 
-  bool DoubleViewingPosCheck(Vector3 checkPos)
-  {
-    return ViewingPosCheck(checkPos) && ReverseViewingPosCheck(checkPos);
-  }
-
-  bool ViewingPosCheck(Vector3 checkPos)
-  {
-    RaycastHit hit;
-    if (Physics.Raycast(checkPos, this.transform.position - checkPos, out hit, relCameraPosMag))
-    {
-      if (hit.transform != this && !hit.transform.GetComponent<Collider>().isTrigger)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool ReverseViewingPosCheck(Vector3 checkPos)
-  {
-    RaycastHit hit;
-    if (Physics.Raycast(this.transform.position, checkPos - this.transform.position, out hit, relCameraPosMag))
-    {
-      if (hit.transform != transform && !hit.transform.GetComponent<Collider>().isTrigger)
-      {
-        return false;
-      }
-    }
-    return true;
-  }
 
   void Update()
   {
@@ -402,6 +412,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
           if (this.fullSyncRateTmp <= 0.0f)
           {
             this.networkView.RPC("UpdateFullPlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+            this.fullSyncRateTmp = this.fullSyncRate;
           }
           else
           {

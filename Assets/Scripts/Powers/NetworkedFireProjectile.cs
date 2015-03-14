@@ -161,7 +161,6 @@ public class NetworkedFireProjectile : MonoBehaviour
     }
   }
 
-  [RPC]
   void LaunchProjectile(Vector3 offset, float magnitude, bool makeChild)
   {
     GameObject clone = Instantiate(projectile, transform.position + offset, transform.rotation) as GameObject;
@@ -172,6 +171,13 @@ public class NetworkedFireProjectile : MonoBehaviour
     {
       clone.transform.parent = this.transform;
     }
+  }
+
+  [RPC]
+  void FireSimpleProjectile(Vector3 launchFrom, Vector3 direction, float magnitude, ForceNodeType type, ForceNodeBehaviour behaviour)
+  {
+    GameObject projectile = new GameObject();
+
   }
 
   void FireBeam()
