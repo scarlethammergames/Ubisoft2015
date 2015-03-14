@@ -47,9 +47,9 @@ public class fireProjectile : MonoBehaviour
 	{
 		_cooldownTimer = _cooldown;
 		_controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
-		if (_parent)
+		if (parent)
 		{
-			this.transform.parent = _parent.transform;
+			this.transform.parent = parent.transform;
 		}
 	}
 	
@@ -60,9 +60,9 @@ public class fireProjectile : MonoBehaviour
 		{
 			_cooldownTimer -= Time.deltaTime;
 			
-			if (_parent)
+			if (parent)
 			{
-				this.transform.position = _parent.transform.position;
+				this.transform.position = parent.transform.position;
 			}
 			
 			bool leftTriggerHeld = (GamePad.GetTrigger(GamePad.Trigger.LeftTrigger, _padIndex) > _triggerThreshold);
