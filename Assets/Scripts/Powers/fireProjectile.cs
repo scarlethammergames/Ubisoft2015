@@ -24,6 +24,8 @@ public class fireProjectile : MonoBehaviour
 	public bool _makeChild = false;
 	public ProjectileAction _projectileAction = ProjectileAction.THROW;
 	public float _controlPullSpeed = 0.1f;
+
+	public LayerMask layerMask;
 	
 	//Rate of fire
 	//public float _powerUpTime = 1.0f;
@@ -47,9 +49,9 @@ public class fireProjectile : MonoBehaviour
 	{
 		_cooldownTimer = _cooldown;
 		_controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
-		if (parent)
+		if (_parent)
 		{
-			this.transform.parent = parent.transform;
+			this.transform.parent = _parent.transform;
 		}
 	}
 	
@@ -60,9 +62,9 @@ public class fireProjectile : MonoBehaviour
 		{
 			_cooldownTimer -= Time.deltaTime;
 			
-			if (parent)
+			if (_parent)
 			{
-				this.transform.position = parent.transform.position;
+				this.transform.position = _parent.transform.position;
 			}
 			
 			bool leftTriggerHeld = (GamePad.GetTrigger(GamePad.Trigger.LeftTrigger, _padIndex) > _triggerThreshold);
@@ -271,6 +273,12 @@ public class fireProjectile : MonoBehaviour
 		{
 			_controller.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, _padIndex);
 			_controller.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, _padIndex);
+
+			// feels better (can't lose control or the controllable and scatter all the items)
+			// but also makes the cam move slow enough to allow the later raycast to not miss
+			_controller.controllerLookDirection.x = 0.15f * _controller.controllerLookDirection.x*_controller.controllerLookDirection.x*_controller.controllerLookDirection.x;
+			_controller.controllerLookDirection.y = 0.15f * _controller.controllerLookDirection.y*_controller.controllerLookDirection.y*_controller.controllerLookDirection.y;
+
 			pull_closer = GamePad.GetTrigger(GamePad.Trigger.RightTrigger, _padIndex) > 0.2f;
 		}
 		else
@@ -279,7 +287,10 @@ public class fireProjectile : MonoBehaviour
 			_controller.controllerLookDirection = new Vector2(Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1), Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1));
 			pull_closer = false;
 		}
-		if (pull_closer) {
+		// make controllable stop in front of player (player is the parent of the parent of this script)
+		float dist = Vector3.Distance (_controlledTarget.transform.position, _parent.transform.parent.transform.position);//Camera.main.transform.position);
+		
+		if (pull_closer && dist > 4f) {
 			pull = -1 * _controlPullSpeed;
 		}
 		
@@ -287,6 +298,12 @@ public class fireProjectile : MonoBehaviour
 		Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward).normalized;
 		Vector3 cameraRight = Camera.main.transform.TransformDirection(Vector3.right).normalized;
 		Vector3 move_direction = pull * cameraForward;
+		
+		// if the controllable hits the floor, keep the player from going lower into the floor
+		if (Physics.Raycast (_controlledTarget.transform.position, -_controlledTarget.transform.up, 0.7f, layerMask)) {
+			if (_controller.controllerLookDirection.y < 0)
+				_controller.controllerLookDirection.y = 0;	
+		}
 		
 		//apply movement
 		_controlledTarget.transform.position = _controlledTarget.transform.position + move_direction;
