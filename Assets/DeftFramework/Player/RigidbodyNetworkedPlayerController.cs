@@ -24,11 +24,11 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   float jumpCooldownTmp;
 
   public float relCameraPosMag = 1.5f;
-  public Vector3 pivotOffset = new Vector3(1.5f, 0.0f, -2.0f);
-  public Vector3 camOffset = new Vector3(1f, 3.5f, -7f);
+  public Vector3 pivotOffset = new Vector3(1.0f, 0.0f, -1.0f);
+  public Vector3 camOffset = new Vector3(1.0f, 3.5f, -7f);
   public Vector3 aimPivotOffset = new Vector3(1.0f, 0.0f, 0.0f);
   public Vector3 aimCamOffset = new Vector3(1f, 3f, -5.0f);
-  public Vector3 runPivotOffset = new Vector3(1f, 0.0f, -2.0f);
+  public Vector3 runPivotOffset = new Vector3(0f, 0.0f, 0.0f);
   public Vector3 runCamOffset = new Vector3(1f, 3.5f, -8f);
   public float runFOV = 80f;
   public float aimFOV = 40f;
@@ -245,6 +245,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
   void Update()
   {
+
     #region TimerMaintenance
     jumpCooldownTmp -= Time.deltaTime;
     #endregion
@@ -322,9 +323,11 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       switch (this.movementType)
       {
         case MovementType.SETVELOCITY:
-          this.GetComponent<Rigidbody>().velocity = Vector3.Lerp(this.GetComponent<Rigidbody>().velocity, this.moveDirection, this.velocityDampingSpeed * Time.deltaTime);
-          this.transform.forward = Vector3.Lerp(this.transform.forward, this.GetComponent<Rigidbody>().velocity.normalized, this.velocityDampingSpeed * Time.deltaTime);
-          this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, this.velocityDampingSpeed * Time.deltaTime);
+          if (this.controllerMoveDirection.sqrMagnitude > 1.0f)
+          {
+            this.GetComponent<Rigidbody>().velocity = Vector3.Lerp(this.GetComponent<Rigidbody>().velocity, this.moveDirection * this.GetComponent<Rigidbody>().mass, 0.1f * this.velocityDampingSpeed * Time.deltaTime);
+            this.transform.forward = Vector3.Lerp(this.transform.forward, new Vector3(this.controllerMoveDirection.x, 0.0f, this.controllerMoveDirection.y), this.velocityDampingSpeed * Time.deltaTime);
+          }
           break;
         case MovementType.IMPULSE:
           Debug.Log(this.moveDirection * this.GetComponent<Rigidbody>().mass * this.impulseDampingSpeed);
@@ -345,7 +348,13 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     {
       Rigidbody rigidbody = this.GetComponent<Rigidbody>();
       PlayerFields fields = this.GetComponent<PlayerFields>();
-      this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+      if (Network.isServer || Network.isClient)
+      {
+        if (this.isThisMachinesPlayer)
+        {
+          this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+        }
+      }
     }
     #endregion
   }
