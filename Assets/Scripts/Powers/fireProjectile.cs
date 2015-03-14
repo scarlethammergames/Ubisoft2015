@@ -68,8 +68,8 @@ public class fireProjectile : MonoBehaviour
       if (_cooldownTimer <= 0.0f)
       {
         //----FIRING----//
-        if ((leftTriggerHeld && _projectileButton == ProjectileTriggerButton.RIGHT)
-        || (rightTriggerHeld && _projectileButton == ProjectileTriggerButton.LEFT))
+        if ((leftTriggerHeld && _projectileButton == ProjectileTriggerButton.LEFT)
+        || (rightTriggerHeld && _projectileButton == ProjectileTriggerButton.RIGHT))
         {
           switch (_projectileAction)
           {
