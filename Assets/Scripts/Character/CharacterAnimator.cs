@@ -7,7 +7,7 @@ public class CharacterAnimator : MonoBehaviour
   public float _sprintThreshold = 10f;
 
   Animator _animator;
-  RigidbodyNetworkedPlayerController _controller;
+  DeftPlayerController _controller;
   Rigidbody _rb;
   string[] _animationBoolParameters = { "isIdle", "isRunning", "isAttacking_Projectile" };
   int _currentStateIndex = 0;
@@ -17,7 +17,7 @@ public class CharacterAnimator : MonoBehaviour
   {
     _animator = this.GetComponent<Animator>();
     transition(0);
-    _controller = this.GetComponent<RigidbodyNetworkedPlayerController>();
+    _controller = this.GetComponent<DeftPlayerController>();
     _rb = this.GetComponent<Rigidbody>();
   }
 
@@ -28,11 +28,11 @@ public class CharacterAnimator : MonoBehaviour
     {
       int newStateIndex = _currentStateIndex;
       //float speed = _rb.GetPointVelocity(Vector3.zero).magnitude;
-      if (_controller.playerState == PlayerControllerState.WALKING)
+      if (_controller.state == PlayerState.walking)
       {
         newStateIndex = 1;
       }
-      else if (_controller.playerState == PlayerControllerState.AIMING)
+      else if (_controller.state == PlayerState.aiming)
       {
         newStateIndex = 2;
       }
