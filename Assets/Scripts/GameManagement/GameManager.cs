@@ -6,6 +6,7 @@ public enum PlayerCharacter {  Syphen, Blitz };
 
 public class GameManager : MonoBehaviour
 {
+  public GameObject DeftClientServer;
   public int[] playerCurrentHealth;
   public int[] playerTotalHealth;
   public int numbersOfDepots;
@@ -21,6 +22,8 @@ public class GameManager : MonoBehaviour
   public GameObject gameOverWindow;
   public GameObject winText;
   public GameObject loseText;
+  public GameObject SyphenPowerUnlock;
+  public GameObject BlitzPowerUnlock;
 
   private int depotsFull;
   private EventSystem eventSystem;
@@ -96,6 +99,7 @@ public class GameManager : MonoBehaviour
   }
   public void depotFull()
   {
+    Debug.Log("A Depot is FULL");
     depotsFull++;
     if (depotsFull == numbersOfDepots)
     {
@@ -103,11 +107,20 @@ public class GameManager : MonoBehaviour
     }
     else
     {
-      //Activate next depot
-      Debug.Log("A Depot is FULL");
-      depots[depotsFull].SetActive(true);
-      depotUI_objects[depotsFull].SetActive(true);
+		//Activate the Power Unlock window 
+		string name = DeftClientServer.GetComponent<PlayerSelect>().selectedPlayer.name;
+		if (name.Contains("Blitz")) {
+			BlitzPowerUnlock.SetActive(true);
+		} else {
+			SyphenPowerUnlock.SetActive(true);
+		}
     }
+  }
+  public void activateNextDepot() 
+  {
+	//Activate next depot
+	depots[depotsFull].SetActive(true);
+	depotUI_objects[depotsFull].SetActive(true);
   }
   public void lastDepotFull()
   {
