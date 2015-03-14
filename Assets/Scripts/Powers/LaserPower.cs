@@ -70,10 +70,28 @@ public class LaserPower : MonoBehaviour
 					if (_alreadyFired)
 					{
 						_alreadyFired = false;
-						if (_controlledProjectile) { Destroy(_controlledProjectile); }
+						DeactivatePower ();
 					}
 				}
 			}
+		}
+	}
+
+	//ActivatePower(Vector3 startPosition, Vector3 direction)
+	//UpdatePowerPosition(Vector3 startPosition, Vector3 direction)
+
+	void ActivatePower(Vector3 startPosition, Vector3 direction){
+		if(Network.isClient || Network.isServer ){
+			_controlledProjectile = Network.Instantiate(_projectile, startPosition, Quaternion.identity, 1) as GameObject;
+		}
+		else{
+			_controlledProjectile = Instantiate(_projectile, startPosition, Quaternion.identity) as GameObject;
+		}
+	}
+
+	void DeactivatePower(){
+		if (_controlledProjectile) {
+			Destroy (_controlledProjectile);
 		}
 	}
 	
@@ -83,15 +101,10 @@ public class LaserPower : MonoBehaviour
 		float beamRange = 500;
 		float beamDiameter = 3;
 		float beamDistanceMagnifier = 5.0f;
-		
+
 		if (!_alreadyFired)
 		{
-			if(Network.isClient || Network.isServer ){
-				_controlledProjectile = Network.Instantiate(_projectile, this.transform.position, Quaternion.identity, 1) as GameObject;
-			}
-			else{
-				_controlledProjectile = Instantiate(_projectile, this.transform.position, Quaternion.identity) as GameObject;
-			}
+			ActivatePower (this.transform.position, new Vector3(0,0,0));
 			_alreadyFired = true;
 		}
 		_controlledProjectile.transform.position = this.transform.position + _offset;

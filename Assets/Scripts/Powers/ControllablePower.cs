@@ -106,14 +106,33 @@ public class ControllablePower : MonoBehaviour
 					if (_alreadyFired)
 					{
 						_alreadyFired = false;
-						if (_controlledProjectile) { Destroy(_controlledProjectile); }
-						if (_controlledTarget) { Destroy(_controlledTarget); }
-						_controller.enabled = true; // unfreeze the player
-						_otherGun.SetActive(true);  // unfreeze the other gun
+						DeactivatePower ();
 					}
 				}
 			}
 		}
+	}
+	void ActivatePower(Vector3 startPosition){
+		if(Network.isClient || Network.isServer){
+			_controlledProjectile = Network.Instantiate(_projectile, startPosition, transform.rotation, 1) as GameObject;
+		}
+		else{
+			_controlledProjectile = Instantiate(_projectile, startPosition, transform.rotation) as GameObject;
+		}
+
+		_controlledTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		_controlledTarget.transform.position = startPosition;
+		if (_controlledTarget.collider) { _controlledTarget.collider.enabled = false; }
+		_controlledTarget.renderer.enabled = false;
+		_controlledTarget.transform.parent = Camera.main.transform;
+	}
+
+
+	void DeactivatePower(){
+		if (_controlledProjectile) { Destroy(_controlledProjectile); }
+		if (_controlledTarget) { Destroy(_controlledTarget); }
+		_controller.enabled = true; // unfreeze the player
+		_otherGun.SetActive(true);  // unfreeze the other gun
 	}
 	
 	[RPC]
@@ -126,17 +145,8 @@ public class ControllablePower : MonoBehaviour
 		{
 			distance = hit.distance;
 		}
-		if(Network.isClient || Network.isServer){
-			_controlledProjectile = Network.Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation, 1) as GameObject;
-		}
-		else{
-			_controlledProjectile = Instantiate(_projectile, transform.position + _offset + (cameraForward * distance), transform.rotation) as GameObject;
-		}
-		_controlledTarget = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		_controlledTarget.transform.position = transform.position + _offset + (cameraForward * distance);
-		if (_controlledTarget.collider) { _controlledTarget.collider.enabled = false; }
-		_controlledTarget.renderer.enabled = false;
-		_controlledTarget.transform.parent = Camera.main.transform;
+
+		ActivatePower (transform.position + _offset + (cameraForward * distance));
 	}
 	
 	[RPC]
@@ -185,6 +195,12 @@ public class ControllablePower : MonoBehaviour
 		
 		//apply movement
 		_controlledTarget.transform.position = _controlledTarget.transform.position + move_direction;
-		_controlledProjectile.transform.position = Vector3.Lerp(_controlledProjectile.transform.position, _controlledTarget.transform.position, _drag * Time.deltaTime);
+
+		MovePower (_controlledProjectile.transform.position, _controlledTarget.transform.position, new Vector3(0,0,0));
+
+	}
+
+	void MovePower(Vector3 currentPosition, Vector3 newPosition, Vector3 velocity){
+		_controlledProjectile.transform.position = Vector3.Lerp(currentPosition, newPosition, _drag * Time.deltaTime);
 	}
 }
