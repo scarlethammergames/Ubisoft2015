@@ -94,6 +94,20 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     }
   }
 
+  #region Networking
+  DeftBodyState goalState;
+  float syncTime;
+
+  [RPC]
+  public void UpdatePlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity)
+  {
+    Debug.Log("Updating player state for " + id.ToString());
+    this.GetComponent<Rigidbody>().position = position;
+    this.GetComponent<Rigidbody>().rotation = rotation;
+    this.GetComponent<Rigidbody>().velocity = velocity;
+    this.GetComponent<Rigidbody>().angularVelocity = angularVelocity;
+  }
+  #endregion
 
   #region CameraCalculators
 
@@ -272,10 +286,6 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     this.moveDirection = this.controllerMoveDirection.y * forward + this.controllerMoveDirection.x * new Vector3(forward.z, 0, -forward.x);
     #endregion
 
-    #region Camera
-    AdjustCamera();
-    #endregion
-
     #region RunningActionByState
     forward = this.myCamera.transform.TransformDirection(Vector3.forward);
     forward = forward.normalized;
@@ -292,6 +302,15 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
         moveDirection *= this.aimSpeedMultiplier;
         break;
     }
+    #endregion
+
+  }
+
+  void FixedUpdate()
+  {
+
+    #region Camera
+    AdjustCamera();
     #endregion
 
     #region Movement
@@ -315,6 +334,14 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
           break;
       }
 
+    }
+    #endregion
+
+    #region NetworkUpdate
+    if(this.isThisMachinesPlayer)
+    {
+      Rigidbody rigidbody = this.GetComponent<Rigidbody>();
+      this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity);
     }
     #endregion
   }
