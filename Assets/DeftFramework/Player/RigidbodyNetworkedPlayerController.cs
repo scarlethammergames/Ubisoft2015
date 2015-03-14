@@ -49,7 +49,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   public GamepadState gamepadState;
 
   public bool isThisMachinesPlayer = false;
-  public bool useGamePad = false;
+  public bool useGamePad = true;
 
   public Camera myCamera;
   Vector3 smoothPivotOffset;
@@ -258,13 +258,14 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     {
       this.playerState = PlayerControllerState.WALKING;
     }
-    #endregion
-
     Vector3 forward = this.myCamera.transform.TransformDirection(Vector3.forward);
     forward = forward.normalized;
     this.moveDirection = this.controllerMoveDirection.y * forward + this.controllerMoveDirection.x * new Vector3(forward.z, 0, -forward.x);
+    #endregion
 
+    #region Camera
     AdjustCamera();
+    #endregion
 
     #region RunningActionByState
     forward = this.myCamera.transform.TransformDirection(Vector3.forward);
@@ -295,6 +296,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
           this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, this.velocityDampingSpeed * Time.deltaTime);
           break;
         case MovementType.IMPULSE:
+          Debug.Log(this.moveDirection * this.GetComponent<Rigidbody>().mass * this.impulseDampingSpeed);
           this.GetComponent<Rigidbody>().AddForce(this.moveDirection * this.GetComponent<Rigidbody>().mass * this.impulseDampingSpeed, ForceMode.Impulse);
           this.transform.forward = Vector3.Lerp(this.transform.forward, this.moveDirection, this.velocityDampingSpeed * Time.deltaTime);
           this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, this.velocityDampingSpeed * Time.deltaTime);
