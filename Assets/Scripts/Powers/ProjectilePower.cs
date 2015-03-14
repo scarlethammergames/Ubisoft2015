@@ -8,7 +8,7 @@ using GamepadInput;
 * Spawn a rigid body GameObject with an initial velocity when triggered. 
 * Constraints: The projectile must contain a rigid body.
 */
-public class fireProximity : MonoBehaviour
+public class ProjectilePower : MonoBehaviour
 {
 	//Launch properties
 	public GameObject _parent;
@@ -27,12 +27,7 @@ public class fireProximity : MonoBehaviour
 	GamePad.Index _padIndex = GamePad.Index.One;
 	float _triggerThreshold = 0.20f;
 	DeftPlayerController _controller;
-	
-	//Controllable Projectile
-	bool _alreadyFired = false;
-	GameObject _controlledTarget = null;
-	GameObject _controlledProjectile = null;
-	
+
 	
 	// Use this for initialization
 	void Start()

@@ -8,7 +8,7 @@ using GamepadInput;
 * Spawn a rigid body GameObject with an initial velocity when triggered. 
 * Constraints: The projectile must contain a rigid body.
 */
-public class fireBeam : MonoBehaviour
+public class LaserPower : MonoBehaviour
 {
 	//Launch properties
 	public GameObject _parent;
@@ -27,7 +27,6 @@ public class fireBeam : MonoBehaviour
 	
 	//Controllable Projectile
 	bool _alreadyFired = false;
-	GameObject _controlledTarget = null;
 	GameObject _controlledProjectile = null;
 	
 	
