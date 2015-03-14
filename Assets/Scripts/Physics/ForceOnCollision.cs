@@ -44,6 +44,7 @@ public class ForceOnCollision: MonoBehaviour {
 
 	void OnTriggerStay(Collider other){
 		if(_delayTime <= 0){
+			DealDamage(other); // call to method that hurts ai
 			PhysicsStatus ps = (PhysicsStatus) other.GetComponent(typeof(PhysicsStatus));
 			if( ps ){
 				switch( _forceType ){
@@ -81,5 +82,15 @@ public class ForceOnCollision: MonoBehaviour {
 		else{
 			_delayTime -= Time.deltaTime;
 		}
+	}
+
+	void DealDamage(Collider other){
+		Killer_Mover km = other.GetComponent<Killer_Mover>(); // grab scripts
+		Feeder_Mover fm = other.GetComponent<Feeder_Mover>();
+		int dmg = 0; // initialize dmg amount
+		if (_forceType==ForceType.Push) dmg = 50; // alter dmg amount according to ability
+		if (_forceType==ForceType.Pull) dmg = 10; // pull does much less
+		if (km) km.health -= dmg; // reduce health here
+		if (fm) fm.health -= dmg;
 	}
 }

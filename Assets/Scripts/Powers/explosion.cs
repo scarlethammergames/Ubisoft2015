@@ -12,6 +12,14 @@ public class explosion : MonoBehaviour {
 		StartCoroutine ("MyMethod");
 	}
 
+	void DealDamage(Collider other){
+		Killer_Mover km = other.GetComponent<Killer_Mover>(); //grab scripts
+		Feeder_Mover fm = other.GetComponent<Feeder_Mover>();
+		int dmg = 50; // set dmg
+		if (km) km.health -= dmg; // reduce health
+		if (fm) fm.health -= dmg;
+	}
+
 	IEnumerator MyMethod() {
 		yield return new WaitForSeconds(delay);
 
@@ -21,6 +29,8 @@ public class explosion : MonoBehaviour {
 		Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
 		foreach (Collider hit in colliders) {
 			// can add cases for non physics objects later
+			DealDamage(hit); // call to method that hurts ai
+
 			PhysicsStatus ps = (PhysicsStatus) hit.GetComponent<PhysicsStatus>(); // grab physics status of object
 			if( ps && ps.pushable ){ 
 				Shatterable shatterable = hit.gameObject.GetComponent<Shatterable>();
