@@ -69,7 +69,10 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     {
       Debug.Log(this.ToString() + " awake.");
     }
-    this.padIndex = GamePad.Index.Any;
+    foreach (NetworkView view in this.GetComponents<NetworkView>())
+    {
+      view.observed = this;
+    }
     if (Network.isClient || Network.isServer)
     {
       if (this.GetComponent<NetworkView>().isMine)
@@ -90,6 +93,9 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       GrabCamera(Camera.main);
     }
   }
+
+
+  #region CameraCalculators
 
   void GrabCamera(Camera cam)
   {
@@ -157,8 +163,10 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
     this.myCamera.transform.position = this.transform.position + camYRotation * smoothPivotOffset + aimRotation * smoothCamOffset;
   }
+  #endregion
 
 
+  #region GUI
   Texture2D temp;
   public float spread;
   public float minSpread = 20.0f;
@@ -185,6 +193,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       this.DrawCrossHair();
     }
   }
+  #endregion
 
   bool DoubleViewingPosCheck(Vector3 checkPos)
   {
