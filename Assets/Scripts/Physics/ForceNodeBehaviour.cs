@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// DEPRECATED, DO NOT USE
+
 public enum ForceNodeType { Push, Pull, Lift }
 public enum DistanceRelationship { None, Linear }
 public enum NodeColliderType { Radial, Box, Custom };

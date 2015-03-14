@@ -15,7 +15,6 @@ public struct GrenadeThrowParameters
 
 public class GrenadeManager : MonoBehaviour
 {
-
   public int currentAmmo;
   public int maxAmmo;
   public float recharge;
@@ -29,43 +28,10 @@ public class GrenadeManager : MonoBehaviour
   private float cooldown = 0; // temp var for cooldown after trigger
   private DeftPlayerController controller;
 
-	private bool goingToFire = false;
-
-  public static byte[] MarshallGrenadeThrowParameters(GrenadeThrowParameters state)
-  {
-    int size = Marshal.SizeOf(state);
-    byte[] arr = new byte[size];
-    IntPtr ptr = Marshal.AllocHGlobal(size);
-    Marshal.StructureToPtr(state, ptr, true);
-    Marshal.Copy(ptr, arr, 0, size);
-    Marshal.FreeHGlobal(ptr);
-    return arr;
-  }
-
-  public static GrenadeThrowParameters UnMarshallGrenadeThrowParameters(byte[] arr)
-  {
-    GrenadeThrowParameters state = new GrenadeThrowParameters();
-    int size = Marshal.SizeOf(state);
-    IntPtr ptr = Marshal.AllocHGlobal(size);
-    Marshal.Copy(arr, 0, ptr, size);
-    state = (GrenadeThrowParameters)Marshal.PtrToStructure(ptr, state.GetType());
-    Marshal.FreeHGlobal(ptr);
-    return state;
-  }
-
-  public GrenadeThrowParameters BuildGrenadeThrowParameters()
-  {
-    GrenadeThrowParameters state = new GrenadeThrowParameters();
-    state.forward = Camera.main.transform.TransformDirection(Vector3.forward);
-    state.forward = state.forward.normalized;
-    state.position = this.transform.position;
-    state.rotation = this.transform.rotation;
-    return state;
-  }
-
+  private bool goingToFire = false;
+	
   void Start()
   {
-    // controller = GameObject.FindGameObjectWithTag("Player").GetComponent<DeftPlayerController>();
     controller = transform.parent.gameObject.GetComponent<DeftPlayerController>();
   }
 
@@ -82,11 +48,11 @@ public class GrenadeManager : MonoBehaviour
 		} else if (!trigger){
 			controller.state = PlayerState.idle; // on trigger release, revert to idle
 			if (cooldown <= 0.0 && currentAmmo > 0 && goingToFire) // conditions for firing
-			{   // get throw params and do network-y stuff by Calem
-				GrenadeThrowParameters state = BuildGrenadeThrowParameters();
-				networkView.RPC("throwGrenade", RPCMode.Others, state.forward, state.position, state.rotation);
-				// throw towards camera, stored in state
-				throwGrenade(state.forward, state.position, state.rotation); 
+			{
+				Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
+				forward = forward.normalized;
+				networkView.RPC("throwGrenade", RPCMode.Others, forward, transform.position, transform.rotation);
+				throwGrenade(forward, transform.position, transform.rotation); 
 				currentAmmo--; // reduce ammo
 				cooldown = triggerCooldown; // reset cooldown
 			}
@@ -95,6 +61,7 @@ public class GrenadeManager : MonoBehaviour
     }
   }
 
+  // method to recharge grenades when under max ammo
   void FixedUpdate()
   {
     if (currentAmmo < maxAmmo)

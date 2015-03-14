@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using GamepadInput;
 
+// DEPRECATED, DO NOT USE
+
 public enum NetworkedProjectileAction { THROW, BEAM, ATTACHTOSELF, REMOTECTRL }
 public enum NetworkedProjectileTrigger { LEFTRIGGER, RIGHTTRIGGER };
 
