@@ -5,7 +5,7 @@ public enum GravityNodeType { Push, Pull, Lift }
 public enum DistanceRelationship { None, Linear }
 public enum NodeColliderType { Radial, Box, Custom };
 
-public class GravityNodeBehaviour : MonoBehaviour
+public class ForceNodeBehaviour : MonoBehaviour
 {
 
   public float magnitudeBirth;

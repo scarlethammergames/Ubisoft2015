@@ -14,15 +14,23 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   public float baseSpeed = 2.0f;
   public float runSpeedMultiplier = 1.5f;
   public float aimSpeedMultiplier = 0.2f;
+
+  [HideInInspector]
   public float horizontalAimingSpeed = 400f;
+  [HideInInspector]
   public float verticalAimingSpeed = 400f;
+  [HideInInspector]
   public float velocityDampingSpeed = 0.02f;
+  [HideInInspector]
   public float impulseDampingSpeed = 0.02f;
 
-  public float jumpHeight = 2.0f;
-  public float jumpCooldown;
+  public float jumpHeight = 4.0f;
+  public float jumpCooldown = 2.0f;
   float jumpCooldownTmp;
 
+  public bool grounded;
+
+  [HideInInspector]
   public float relCameraPosMag = 1.5f;
   public Vector3 pivotOffset = new Vector3(1.0f, 0.0f, -1.0f);
   public Vector3 camOffset = new Vector3(1.0f, 3.5f, -7f);
@@ -48,9 +56,11 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   [HideInInspector]
   public GamepadState gamepadState;
 
+  [HideInInspector]
   public bool isThisMachinesPlayer = false;
   public bool useGamePad = true;
 
+  [HideInInspector]
   public Camera myCamera;
   Vector3 smoothPivotOffset;
   Vector3 smoothCamOffset;
@@ -59,9 +69,13 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   float defaultFOV;
   float targetFOV;
 
+  [HideInInspector]
   public bool showCrosshair = false;
   public Texture2D verticalTexture;
   public Texture2D horizontalTexture;
+
+  public float fullSyncRate = 1.0f;
+  float fullSyncRateTmp;
 
   void Awake()
   {
@@ -99,7 +113,8 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   float syncTime;
 
   [RPC]
-  public void UpdatePlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity, float health, NetworkViewID id)
+
+  public void UpdateFullPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity, float health, NetworkViewID id)
   {
     if (this.networkView.viewID == id)
     {
@@ -108,6 +123,17 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       this.GetComponent<Rigidbody>().velocity = velocity;
       this.GetComponent<Rigidbody>().angularVelocity = angularVelocity;
       this.GetComponent<PlayerFields>().health = health;
+    }
+  }
+
+  [RPC]
+  public void UpdatePartialPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, NetworkViewID id)
+  {
+    if (this.networkView.viewID == id)
+    {
+      this.GetComponent<Rigidbody>().position = position;
+      this.GetComponent<Rigidbody>().rotation = rotation;
+      this.GetComponent<Rigidbody>().velocity = velocity;
     }
   }
   #endregion
@@ -185,22 +211,25 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
   #region GUI
   Texture2D temp;
-  public float spread;
-  public float minSpread = 20.0f;
-  public float maxSpread = 40.0f;
+  [HideInInspector]
+  public float crosshairSpread;
+  [HideInInspector]
+  public float minCrosshairSpread = 20.0f;
+  [HideInInspector]
+  public float maxCrosshairSpread = 40.0f;
   void DrawCrossHair()
   {
     GUIStyle verticalT = new GUIStyle();
     GUIStyle horizontalT = new GUIStyle();
     verticalT.normal.background = verticalTexture;
     horizontalT.normal.background = horizontalTexture;
-    spread = Mathf.Clamp(spread, minSpread, maxSpread);
+    crosshairSpread = Mathf.Clamp(crosshairSpread, minCrosshairSpread, maxCrosshairSpread);
     Vector2 pivot = new Vector2(Screen.width / 2, Screen.height / 2);
-    GUI.Box(new Rect((Screen.width - 2) / 2, (Screen.height - spread) / 2 - 14, 2, 14), temp, horizontalT);
+    GUI.Box(new Rect((Screen.width - 2) / 2, (Screen.height - crosshairSpread) / 2 - 14, 2, 14), temp, horizontalT);
     GUIUtility.RotateAroundPivot(45, pivot);
-    GUI.Box(new Rect((Screen.width + spread) / 2, (Screen.height - 2) / 2, 14, 2), temp, verticalT);
+    GUI.Box(new Rect((Screen.width + crosshairSpread) / 2, (Screen.height - 2) / 2, 14, 2), temp, verticalT);
     GUIUtility.RotateAroundPivot(0, pivot);
-    GUI.Box(new Rect((Screen.width - 2) / 2, (Screen.height + spread) / 2, 2, 14), temp, horizontalT);
+    GUI.Box(new Rect((Screen.width - 2) / 2, (Screen.height + crosshairSpread) / 2, 2, 14), temp, horizontalT);
   }
 
   void OnGUI()
@@ -247,7 +276,8 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   {
 
     #region TimerMaintenance
-    jumpCooldownTmp -= Time.deltaTime;
+    this.jumpCooldownTmp -= Time.deltaTime;
+    this.fullSyncRateTmp -= Time.deltaTime;
     #endregion
 
     #region GatherInput
@@ -318,13 +348,15 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
     #endregion
 
     #region Movement
+    this.grounded = this.isGrounded();
     if (this.moveDirection.magnitude > 0.05f)
     {
       switch (this.movementType)
       {
         case MovementType.SIMPLEWALK:
           this.moveDirection.y = 0f;
-          this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed * this.GetComponent<Rigidbody>().mass + new Vector3(0f, this.GetComponent<Rigidbody>().velocity.y, 0f);
+          float yVelocityTmp = this.GetComponent<Rigidbody>().velocity.y;
+          this.GetComponent<Rigidbody>().velocity = this.moveDirection * this.baseSpeed * this.GetComponent<Rigidbody>().mass;
           this.transform.forward = this.moveDirection.normalized;
           this.GetComponent<Rigidbody>().angularVelocity = Vector3.Lerp(this.GetComponent<Rigidbody>().angularVelocity, Vector3.zero, 1.0f * Time.deltaTime);
           if (this.playerState == PlayerControllerState.RUNNING)
@@ -334,6 +366,14 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
           else if (this.playerState == PlayerControllerState.AIMING)
           {
             this.GetComponent<Rigidbody>().velocity *= this.aimSpeedMultiplier;
+          }
+          if (grounded)
+          {
+
+          }
+          else
+          {
+            this.GetComponent<Rigidbody>().velocity += Physics.gravity;
           }
           break;
         case MovementType.IMPULSE:
@@ -359,7 +399,14 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       {
         if (this.isThisMachinesPlayer)
         {
-          this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+          if (this.fullSyncRateTmp <= 0.0f)
+          {
+            this.networkView.RPC("UpdateFullPlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+          }
+          else
+          {
+            this.networkView.RPC("UpdatePartialPlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, this.networkView.viewID);
+          }
         }
       }
     }
@@ -368,6 +415,6 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
 
   public bool isGrounded()
   {
-    return Physics.Raycast(this.transform.position, Vector3.down, (this.GetComponent<CapsuleCollider>().height / 2.0f) + 0.1f);
+    return Physics.Raycast(this.transform.position, Vector3.down, (this.GetComponent<CapsuleCollider>().height / 2.0f) + 0.2f);
   }
 }
