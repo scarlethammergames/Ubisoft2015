@@ -36,8 +36,8 @@ public class fireProjectile : MonoBehaviour
 
   //Controllable Projectile
   bool _alreadyFired = false;
-  GameObject _controlledTarget;
-  GameObject _controlledProjectile;
+  GameObject _controlledTarget = null;
+  GameObject _controlledProjectile = null;
 
 
   // Use this for initialization
@@ -74,14 +74,18 @@ public class fireProjectile : MonoBehaviour
           switch (_projectileAction)
           {
             case ProjectileAction.THROW:
-              if (Network.isClient || Network.isServer)
-              {
-                networkView.RPC("LaunchProjectile", RPCMode.All, _offset, _magnitude, _makeChild);
-              }
-              else
-              {
-                LaunchProjectile(_offset, _magnitude, _makeChild);
-              }
+			  if(_alreadyFired) 
+			  {
+				Debug.Log("i'm gonna launch it");
+				  if (Network.isClient || Network.isServer)
+		          {
+		            networkView.RPC("LaunchProjectile", RPCMode.All, _offset, _magnitude, _makeChild);
+		          }
+		          else
+		          {
+		            LaunchProjectile(_offset, _magnitude, _makeChild);
+		          }
+			  }
               break;
 
             case ProjectileAction.BEAM: 
@@ -255,25 +259,33 @@ public class fireProjectile : MonoBehaviour
   void MoveControllable()
   {
     _controller.controllerMoveDirection = Vector2.zero;
+
+	bool pull_closer;
+	float pull = 0;
     //Get controller direction
     if (_controller.gamepadState != null)
     {
       _controller.controllerMoveDirection = GamePad.GetAxis(GamePad.Axis.LeftStick, _padIndex);
       _controller.controllerLookDirection = GamePad.GetAxis(GamePad.Axis.RightStick, _padIndex);
+			pull_closer = GamePad.GetTrigger(GamePad.Trigger.RightTrigger, _padIndex) > 0.2f;
     }
     else
     {
       _controller.controllerMoveDirection = new Vector2(Input.GetAxis("Horizontal"), -Input.GetAxis("Vertical"));
       _controller.controllerLookDirection = new Vector2(Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1), Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1));
+	  pull_closer = false;
     }
-
+	if (pull_closer) {
+			pull = -0.1f;
+	}
+	
     // get forward direction
     Vector3 cameraForward = Camera.main.transform.TransformDirection(Vector3.forward).normalized;
     Vector3 cameraRight = Camera.main.transform.TransformDirection(Vector3.right).normalized;
-    Vector3 move_direction = _controller.controllerMoveDirection.y * cameraForward + _controller.controllerMoveDirection.x * cameraRight;
+    Vector3 move_direction = pull * cameraForward;
 
     //apply movement
-    _controlledTarget.transform.position = _controlledTarget.transform.position + move_direction * _magnitude;
+	_controlledTarget.transform.position = _controlledTarget.transform.position + move_direction;
     _controlledProjectile.transform.position = Vector3.Lerp(_controlledProjectile.transform.position, _controlledTarget.transform.position, _drag * Time.deltaTime);
   }
 }
