@@ -74,6 +74,9 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   public Texture2D verticalTexture;
   public Texture2D horizontalTexture;
 
+  public float fullSyncRate = 1.0f;
+  float fullSyncRateTmp;
+
   void Awake()
   {
     if (debug)
@@ -110,6 +113,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   float syncTime;
 
   [RPC]
+
   public void UpdateFullPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angularVelocity, float health, NetworkViewID id)
   {
     if (this.networkView.viewID == id)
@@ -123,7 +127,7 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   }
 
   [RPC]
-  public void UpdateFullPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, NetworkViewID id)
+  public void UpdatePartialPlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, NetworkViewID id)
   {
     if (this.networkView.viewID == id)
     {
@@ -131,7 +135,8 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       this.GetComponent<Rigidbody>().rotation = rotation;
       this.GetComponent<Rigidbody>().velocity = velocity;
     }
-  }  #endregion
+  }
+  #endregion
 
   #region CameraCalculators
 
@@ -271,7 +276,8 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
   {
 
     #region TimerMaintenance
-    jumpCooldownTmp -= Time.deltaTime;
+    this.jumpCooldownTmp -= Time.deltaTime;
+    this.fullSyncRateTmp -= Time.deltaTime;
     #endregion
 
     #region GatherInput
@@ -393,7 +399,14 @@ public class RigidbodyNetworkedPlayerController : MonoBehaviour
       {
         if (this.isThisMachinesPlayer)
         {
-          this.networkView.RPC("UpdatePlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+          if (this.fullSyncRateTmp <= 0.0f)
+          {
+            this.networkView.RPC("UpdateFullPlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, rigidbody.angularVelocity, fields.health, this.networkView.viewID);
+          }
+          else
+          {
+            this.networkView.RPC("UpdatePartialPlayerState", RPCMode.Others, rigidbody.position, rigidbody.rotation, rigidbody.velocity, this.networkView.viewID);
+          }
         }
       }
     }
